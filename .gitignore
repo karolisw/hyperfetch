@@ -1,0 +1,6 @@
+.idea
+venv
+*.xml
+test_main.http
+main.py
+.env
