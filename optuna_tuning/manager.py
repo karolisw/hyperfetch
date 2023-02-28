@@ -1,94 +1,145 @@
 import os
-from typing import Optional
-
-import optuna
+import gym
 import yaml
+import torch
+import optuna
 import logging
 import logging.config
 
-import gymnasium as gym
-from gymnasium import spaces
+from gym import spaces
+from pprint import pprint
+from typing import Optional
+from datetime import datetime
+from callbacks import TrialEvalCallback
+from alg_samplers import ALG_HP_SAMPLER
+from optuna.integration import SkoptSampler
+from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
 from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
-from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped, VecNormalize
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-
-from datetime import datetime
+from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped, VecNormalize
 from optuna.samplers import RandomSampler, GridSampler, TPESampler, CmaEsSampler, NSGAIISampler
-from optuna.integration import SkoptSampler
+from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
 from optuna.pruners import SuccessiveHalvingPruner, MedianPruner, NopPruner, HyperbandPruner, PercentilePruner, \
     PatientPruner, ThresholdPruner
-from alg_samplers import ALG_HP_SAMPLER
 
-logger: Optional[logging.Logger] = None  # logger configured during init()
+logger: Optional[
+    logging.Logger] = None  # logger configured during init() #todo probably not necessary for this to be global
 
 
-# TODO part of init() and all other functions here are part of the manager
+def _select_model(alg, **kwargs):
+    if alg == "ppo":
+        return PPO(**kwargs)
+    elif alg == "dqn":
+        return DQN(**kwargs)
+    elif alg == "a2c":
+        return A2C(**kwargs)
+    elif alg == "td3":
+        return TD3(**kwargs)
+    elif alg == "sac":
+        return SAC(**kwargs)
+
+
 class Manager:
-    def __init__(self, log_folder, config_path="hp_config.yml"
-                                               """,
-        # Assigned through the use of config file "hp_config.yml"
-        alg,
-        env,
-        name,
-        sampler,
-        pruner,
-        seed,
-        n_startup_trials,
-        n_timesteps,
-        n_jobs,
-        n_evaluations,
-        eval_freq,
-        n_trials,
-        n_warmup_steps,
-        n_min_trials,
-        log_folder,
-        # Assigned through the use of "_pruner_check"
-        patience,
-        min_delta,
-        percentile,
-        max_resource,
-        min_resource,
-        reduction_factor,
-        bootstrap_count,
-        upper,
-        lower,
-        # Assigned through the use of "_sampler_check"
-        population_size,
-        mutation_prob,
-        crossover_prob,
-        swapping_prob,
-        # Assigned through the use of "alg_samplers.py"
-        """
-                 ):
+    def __init__(self, log_folder, config_path="hp_config.yml"):
+        self.config_path = config_path
+
         # Does not create a new folder if the folder already exists
         self.log_folder = log_folder
         _create_log_folder(self.log_folder)
-
         self._create_logger("test_logger")
 
         # Assigns values to most of the parameters above
         self._verify_config(config_path)
 
-        print("env: ", self.env)
-        print("alg: ", self.alg)
-        print("name: ", self.name)
-        print("sampler: ", self.sampler)
-        print("pruner: ", self.pruner)
-        print("seed: ", self.seed)
-        print("n_startup_trials: ", self.n_startup_trials)
-        print("n_trials: ", self.n_trials)
-
-        # TODO create env
-        # TODO create model
-        # TODO assign policy to hp_config and add it to verify config
+        # Select sampler and pruner and assign to self
+        self._select_sampler()
+        self._select_pruner()
 
     def objective(self, trial: optuna.Trial) -> float:
+
+        # Creating an environment for the model
+        env = self.create_envs(n_envs=self.n_envs, no_log=True)
+
+        # Essential args
+        kwargs = {"policy": self.policy, "env": env, "seed": None}
+
         # Retrieving hyperparameters related to current algorithm
-        kwargs = ALG_HP_SAMPLER[self.alg](trial)
-        # Updating with current
-        kwargs.update({"policy": "MlpPolicy", "env": self.env})  # todo write self.policy when self has a policy
+        hyperparameters = ALG_HP_SAMPLER[self.alg](trial)
+        kwargs.update(hyperparameters)
+
+        # Create the RL model
+        model = _select_model(self.alg, **kwargs)
+
+        # Creating evaluation env
+        eval_env = self.create_envs(n_envs=self.n_envs, eval_env=True)
+        eval_freq_optuna = int(self.n_timesteps / self.n_evaluations)
+
+        # Account for parallel envs
+        eval_freq_optuna = max(eval_freq_optuna // self.n_envs, 1)
+
+        # Create the callback that will periodically evaluate and report the performance.
+        eval_callback = TrialEvalCallback(  # todo n_eval_episodes = n_evaluaitions... is this correct? see sb3
+            eval_env, trial, n_eval_episodes=self.n_evaluations, eval_freq=eval_freq_optuna, deterministic=True
+        )
+
+        try:
+            print("n timesteps: ", self.n_timesteps)
+            model.learn(self.n_timesteps, callback=eval_callback)  # edit callback to use the same numbers as others
+            # Free memory
+            model.env.close()
+            eval_env.close()
+        except (AssertionError, ValueError) as e:
+            # Free memory
+            model.env.close()
+            eval_env.close()
+            # Prune hyperparams that generate NaNs
+            print(e)
+            print("============")
+            print("Sampled hyperparams:")
+            pprint(hyperparameters)
+            raise optuna.exceptions.TrialPruned()
+
+        # Return the mean reward of the trial
+        is_pruned = eval_callback.is_pruned
+        reward = eval_callback.last_mean_reward
+
+        del model.env, eval_env
+        del model
+
+        if is_pruned:
+            raise optuna.exceptions.TrialPruned()
+
+        return reward
+
+    def run(self):
+
+        # Set pytorch num threads to 1 for faster training.
+        torch.set_num_threads(1)
+
+        # Do not prune before 1/3 of the max budget is used.
+        # pruner = MedianPruner(n_startup_trials=N_STARTUP_TRIALS, n_warmup_steps=N_EVALUATIONS // 3)
+
+        study = optuna.create_study(sampler=self.sampler, pruner=self.pruner, direction="maximize")
+        try:
+            study.optimize(self.objective, n_trials=self.n_trials, timeout=600)
+        except KeyboardInterrupt:
+            pass
+
+        print("Number of finished trials: ", len(study.trials))
+
+        print("Best trial:")
+        trial = study.best_trial
+
+        print("  Value: ", trial.value)
+
+        print("  Params: ")
+        for key, value in trial.params.items():
+            print("    {}: {}".format(key, value))
+
+        print("  User attrs:")
+        for key, value in trial.user_attrs.items():
+            print("    {}: {}".format(key, value))
 
     def _create_logger(self, logger_name) -> None:
         """
@@ -134,6 +185,25 @@ class Manager:
             logger.error("An environment 'env' must be specified in config at path %s",
                          path_to_config, stack_info=True)
 
+        policy_list = {"MlpPolicy", "CnnPolicy", "MultiInputPolicy"}
+        if 'policy' not in data.keys() or 'policy' not in policy_list:
+            logger.info('No policy was specified. Config value "policy" set to "MlpPolicy".')
+            data.update({'policy': 'MlpPolicy'})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
+
+        if 'n_envs' not in data.keys():
+            logger.info('No n_envs was specified. Config value "n_envs" set to 1.')
+            data.update({'n_envs': 1})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
+
+        if 'frame_stack' not in data.keys():
+            logger.info('frame_stack not specified. Config value "frame_stack" set to "None".')
+            data.update({'frame_stack': None})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
+
         if 'name' not in data.keys():
             now = datetime.now()
             dt_string = 'study_' + now.strftime("%d/%m/%Y_%H:%M:%S")
@@ -170,7 +240,7 @@ class Manager:
             logger.info('No log_folder was specified. Config value "log_folder" set to "logs".')
             data.update({'log_folder': 'logs'})
             with open(path_to_config, "w") as writer:
-                yaml.dump(data, writer)
+                yaml.safe_dump(data, writer)
 
         if 'n_timesteps' not in data.keys():
             logger.info('No n_timesteps was specified. Config value "n_timesteps" set to 20000.')
@@ -219,6 +289,9 @@ class Manager:
         # Assign the now verified parameters to the Manager
         self.alg = data['alg']
         self.env = data['env']
+        self.policy = data['policy']
+        self.n_envs = data['n_envs']
+        self.frame_stack = data['frame_stack']
         self.name = data['name']
         self.sampler = data['sampler']
         self.pruner = data['pruner']
@@ -460,34 +533,30 @@ class Manager:
             self.monitor_kwargs = dict(info_keywords=("is_success",))
         '''
 
-        spec = gym.spec(self.name)
-        print("this is what gym spec looks like (line 457 atm): ", spec)
+        spec = gym.spec(self.env)
 
-        '''
         def make_env(**kwargs) -> gym.Env:
-            env = spec.make(**kwargs)
-            return env
-        '''
+            gym_env = spec.make(**kwargs)
+            return gym_env
 
         # On most env, SubprocVecEnv does not help and is quite memory hungry
         # therefore we use DummyVecEnv by default
         env = make_vec_env(
-            self.env,
+            make_env,
             n_envs=n_envs,
-            seed=self.seed,
-            monitor_dir=log_dir,
+            # seed=self.seed,
+            monitor_dir=log_dir
         )
 
         # Wrap the env into a VecNormalize wrapper if needed
         # and load saved statistics when present
-        env = _normalize_if_needed(env, eval_env)
+        # env = _normalize_if_needed(env, eval_env)
 
         # Optional Frame-stacking
         if self.frame_stack is not None:
             n_stack = self.frame_stack
             env = VecFrameStack(env, n_stack)
-            if self.verbose > 0:
-                print(f"Stacking {n_stack} frames")
+            self.logger.info(f"Stacking {n_stack} frames")
 
         if not is_vecenv_wrapped(env, VecTransposeImage):
             wrap_with_vec_transpose = False
@@ -533,14 +602,6 @@ def _create_log_folder(path) -> None:
     os.makedirs(path, exist_ok=True)
 
 
-def objective():
-    pass
-
-
-def hyperparameter_optimization():
-    pass
-
-
 if __name__ == '__main__':
     #################### All these below should be added to the init() method ######################
 
@@ -550,4 +611,16 @@ if __name__ == '__main__':
     # pruner = _create_pruner()
     # print(pruner)
     # _verify_config("hp_config.yml")
+
+    # Init()
     manager = Manager(log_folder="logs", config_path="hp_config.yml")
+
+    # Then run objective function and study
+    manager.run()
+
+# Todo for i morgen:
+#  ta en titt på prosjektets todos -> eksempelvis å bruke create_envs i stedet for å gjøre alt manuelt. Funker det?
+#  se på hvordan sb3zoo bruker hyperparameter optimization (run i dette prosjektet) i sin "train" fil og gjør noe lignende
+#  Er det slik at vi burde ha maximise eller minimize her? hva brukes i sb3?
+#  ha med metoden fra train.py som heter "get_close_matches" (ved valg av env som ikke finnes)
+#  self.optimization_log_path fra objective function i sb3 burde være med når jeg vet at programmet kjører

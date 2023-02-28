@@ -2,6 +2,7 @@ alg: ppo
 bootstrap_count: 0
 env: LunarLander-v2
 eval_freq: 10000
+frame_stack: null
 log_folder: logs
 lower: 0.0
 max_resource: 6
@@ -20,6 +21,7 @@ n_warmup_steps: 0
 name: study_22/02/2023_14:35:04
 patience: 50
 percentile: 25.0
+policy: MlpPolicy
 pruner: hyperband
 reduction_factor: 3.0
 sampler: tpe
