@@ -1,6 +1,7 @@
 import os
 import gym
 import yaml
+import time
 import torch
 import optuna
 import logging
@@ -52,9 +53,6 @@ class Manager:
         # Assigns values to most of the parameters above
         self._verify_config(config_path)
 
-        # Select sampler and pruner and assign to self
-        self._select_sampler()
-        self._select_pruner()
 
     def objective(self, trial: optuna.Trial) -> float:
 
@@ -78,13 +76,18 @@ class Manager:
         # Account for parallel envs
         eval_freq_optuna = max(eval_freq_optuna // self.n_envs, 1)
 
+        # The user can state that the path is None in config to avoid logging
+        path = None
+        if self.trial_log_path is not None:
+            path = os.path.join(self.trial_log_path, "trial_" + str(trial.number))
+
         # Create the callback that will periodically evaluate and report the performance.
-        eval_callback = TrialEvalCallback(  # todo n_eval_episodes = n_evaluaitions... is this correct? see sb3
-            eval_env, trial, n_eval_episodes=self.n_evaluations, eval_freq=eval_freq_optuna, deterministic=True
-        )
+        eval_callback = TrialEvalCallback(
+            eval_env=eval_env, trial=trial, log_path=path, n_eval_episodes=self.n_evaluations,
+            eval_freq=eval_freq_optuna, deterministic=True)
 
         try:
-            print("n timesteps: ", self.n_timesteps)
+
             model.learn(self.n_timesteps, callback=eval_callback)  # edit callback to use the same numbers as others
             # Free memory
             model.env.close()
@@ -114,32 +117,58 @@ class Manager:
 
     def run(self):
 
+        # TODO create storage and add to study below
+
         # Set pytorch num threads to 1 for faster training.
         torch.set_num_threads(1)
+
+        # Using config args, the sampler and pruner is selected
+        # Select sampler and pruner and assign to self
+        sampler = self._select_sampler()
+        pruner = self._select_pruner()
 
         # Do not prune before 1/3 of the max budget is used.
         # pruner = MedianPruner(n_startup_trials=N_STARTUP_TRIALS, n_warmup_steps=N_EVALUATIONS // 3)
 
-        study = optuna.create_study(sampler=self.sampler, pruner=self.pruner, direction="maximize")
+        study = optuna.create_study(sampler=sampler, pruner=pruner, study_name=self.name,
+                                    direction="maximize")
         try:
-            study.optimize(self.objective, n_trials=self.n_trials, timeout=600)
+            study.optimize(self.objective, n_jobs=self.n_jobs, n_trials=self.n_trials)  # , timeout=600)
         except KeyboardInterrupt:
             pass
 
         print("Number of finished trials: ", len(study.trials))
 
-        print("Best trial:")
         trial = study.best_trial
+        print("Best trial: ", trial)
 
-        print("  Value: ", trial.value)
+        print("Value: ", trial.value)
 
-        print("  Params: ")
+        print("Params: ")
         for key, value in trial.params.items():
             print("    {}: {}".format(key, value))
 
         print("  User attrs:")
         for key, value in trial.user_attrs.items():
             print("    {}: {}".format(key, value))
+
+        report_name = (
+            f"report_{self.env}_{self.n_trials}-trials-{self.n_timesteps}"
+            f"-{self.sampler}-{self.pruner}_{int(time.time())}"
+        )
+        # This is where the report will be written to
+        log_path = os.path.join(self.log_folder, self.alg, report_name)
+        self.logger.info("Writing report to ", log_path)
+
+        # Write report
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        study.trials_dataframe().to_csv(f"{log_path}.csv")
+
+        '''
+        Save python object to inspect/re-use it later
+        with open(f"{log_path}.pkl", "wb+") as f:
+            pkl.dump(study, f)
+        '''
 
     def _create_logger(self, logger_name) -> None:
         """
@@ -242,6 +271,12 @@ class Manager:
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
+        if 'trial_log_path' not in data.keys():
+            logger.info('No trial_log_path was specified. Config value "trial_log_path" set to "logs/trials".')
+            data.update({'trial_log_path': 'logs/trials'})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
+
         if 'n_timesteps' not in data.keys():
             logger.info('No n_timesteps was specified. Config value "n_timesteps" set to 20000.')
             data.update({'n_timesteps': 20000})
@@ -259,7 +294,7 @@ class Manager:
             data.update({'n_jobs': 1})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
-
+        '''
         if 'eval_freq' not in data.keys() or (
                 'eval_freq' in data.keys() and data['eval_freq'] != (data['n_timesteps'] / data['n_evaluations'])):
             data.update({'eval_freq': int(data['n_timesteps'] / data['n_evaluations'])})
@@ -267,6 +302,12 @@ class Manager:
                 yaml.safe_dump(data, writer)
             logger.info('eval_freq should be n_timesteps/n_evaluations. Config value "eval_freq" set to %s.',
                         data['eval_freq'])
+        '''
+        if 'eval_freq' not in data.keys():
+            logger.info('No eval_freq was specified for the eval callback. Config value "eval_freq" set to 10000.')
+            data.update({'eval_freq': 10000})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
 
         if 'n_trials' not in data.keys():
             logger.info('No n_trials was specified. Config value "n_trials" set to 500.')
@@ -298,6 +339,7 @@ class Manager:
         self.seed = data['seed']
         self.n_startup_trials = data['n_startup_trials']
         self.log_folder = data['log_folder']
+        self.trial_log_path = data['trial_log_path']
         self.n_timesteps = data['n_timesteps']
         self.n_jobs = data['n_jobs']
         self.n_evaluations = data['n_evaluations']
@@ -441,7 +483,7 @@ class Manager:
         if data['sampler'] == 'skopt':
             self.skopt_kwargs = {"base_estimator": "GP", "acq_func": "gp_hedge"}
 
-    def _select_sampler(self) -> None:
+    def _select_sampler(self) -> optuna.samplers:
         """
         Recommended: random, tpe (default) or skopt
         return: Nothing, but assigns sampler to the Manager object
@@ -452,60 +494,60 @@ class Manager:
 
         # self.sampler changes from string to sampler object
         if sampler == "random":
-            self.sampler = RandomSampler(seed=seed)
+            return RandomSampler(seed=seed)
         elif sampler == "grid":
             alg = self.alg
             # TODO GridSampler does not work because missing trial arg in parentheses () after [alg]
-            self.sampler = GridSampler(search_space=ALG_HP_SAMPLER[alg](), seed=seed)
+            return GridSampler(search_space=ALG_HP_SAMPLER[alg](), seed=seed)
         elif sampler == "cmaes":
-            self.sampler = CmaEsSampler(n_startup_trials=n_startup_trials, seed=seed)
+            return CmaEsSampler(n_startup_trials=n_startup_trials, seed=seed)
         elif sampler == "nsgaii":
-            self.sampler = NSGAIISampler(population_size=self.population_size, mutation_prob=self.mutation_prob,
+            return NSGAIISampler(population_size=self.population_size, mutation_prob=self.mutation_prob,
                                          crossover_prob=self.crossover_prob, swapping_prob=self.swapping_prob,
                                          seed=seed)
         elif sampler == "tpe":
-            self.sampler = TPESampler(n_startup_trials=n_startup_trials, seed=seed, multivariate=True)
+            return TPESampler(n_startup_trials=n_startup_trials, seed=seed, multivariate=True)
         elif sampler == "skopt":
-            self.sampler = SkoptSampler(skopt_kwargs={"base_estimator": "GP", "acq_func": "gp_hedge"})
+            return SkoptSampler(skopt_kwargs={"base_estimator": "GP", "acq_func": "gp_hedge"})
         else:
             logger.error("Unknown sampler %s", sampler, stack_info=True)
 
-    def _select_pruner(self) -> None:
+    def _select_pruner(self) -> optuna.pruners:
         pruner = self.pruner
 
         if pruner == "halving":
-            self.pruner = SuccessiveHalvingPruner()
+            return SuccessiveHalvingPruner()
         elif pruner == "median":
-            self.pruner = MedianPruner(n_startup_trials=self.n_startup_trials,
-                                       n_warmup_steps=self.n_warmup_steps,
-                                       interval_steps=self.eval_freq,  # todo is this checked for in verification?
+            return MedianPruner(n_startup_trials=self.n_startup_trials,
+                                       n_warmup_steps=self.n_evaluations // 3,
+                                       # interval_steps=self.eval_freq,  # todo is this checked for in verification?
                                        n_min_trials=self.n_min_trials)
         elif pruner == "patient":
-            wrapped_pruner = MedianPruner(n_startup_trials=self.n_startup_trials,
-                                          n_warmup_steps=self.n_warmup_steps,
-                                          interval_steps=self.eval_freq,
+            return MedianPruner(n_startup_trials=self.n_startup_trials,
+                                          n_warmup_steps=self.n_evaluations // 3,
+                                          # interval_steps=self.eval_freq,
                                           n_min_trials=self.n_min_trials)
-            self.pruner = PatientPruner(wrapped_pruner=wrapped_pruner,
+            return PatientPruner(wrapped_pruner=wrapped_pruner,
                                         patience=self.patience,
                                         min_delta=self.min_delta)
         elif pruner == "percentile":
-            self.pruner = PercentilePruner(n_startup_trials=self.n_startup_trials,
+            return PercentilePruner(n_startup_trials=self.n_startup_trials,
                                            percentile=self.percentile,
-                                           n_warmup_steps=self.n_warmup_steps,
-                                           interval_steps=self.eval_freq,
+                                           n_warmup_steps=self.n_evaluations // 3,
+                                           # interval_steps=self.eval_freq,
                                            n_min_trials=self.n_min_trials)
         elif pruner == "hyperband":
-            self.pruner = HyperbandPruner(min_resource=self.min_resource,  # the number of halving-pruners
+            return HyperbandPruner(min_resource=self.min_resource,  # the number of halving-pruners
                                           max_resource=self.max_resource,
                                           reduction_factor=self.reduction_factor,
                                           bootstrap_count=self.bootstrap_count)
         elif pruner == "threshold":
-            self.pruner = ThresholdPruner(lower=self.lower,
+            return ThresholdPruner(lower=self.lower,
                                           upper=self.upper,
-                                          n_warmup_steps=self.n_warmup_steps,
-                                          interval_steps=self.eval_freq)
+                                          n_warmup_steps=self.n_evaluations // 3)
+            # interval_steps=self.eval_freq)
         elif pruner == "none":
-            self.pruner = NopPruner()  # Do not prune
+            return NopPruner()  # Do not prune
 
         else:
             logger.error("Unknown pruner %s", pruner, stack_info=True)
@@ -615,12 +657,9 @@ if __name__ == '__main__':
     # Init()
     manager = Manager(log_folder="logs", config_path="hp_config.yml")
 
-    # Then run objective function and study
+    # Then run objecti  ve function and study
     manager.run()
-
-# Todo for i morgen:
-#  ta en titt på prosjektets todos -> eksempelvis å bruke create_envs i stedet for å gjøre alt manuelt. Funker det?
-#  se på hvordan sb3zoo bruker hyperparameter optimization (run i dette prosjektet) i sin "train" fil og gjør noe lignende
-#  Er det slik at vi burde ha maximise eller minimize her? hva brukes i sb3?
+# todo i dag -> prøv å legge til i databasen!
+#  bruk optuna sin streamhandler til å logge
 #  ha med metoden fra train.py som heter "get_close_matches" (ved valg av env som ikke finnes)
 #  self.optimization_log_path fra objective function i sb3 burde være med når jeg vet at programmet kjører
