@@ -1,18 +1,21 @@
 import os
 import gym
 import yaml
+import json
 import time
 import torch
 import optuna
 import logging
+import pymongo
+import pickle as pkl
 import logging.config
 
 from gym import spaces
 from pprint import pprint
 from typing import Optional
-from datetime import datetime
 from callbacks import TrialEvalCallback
 from alg_samplers import ALG_HP_SAMPLER
+from bson.json_util import dumps, loads
 from optuna.integration import SkoptSampler
 from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
 from stable_baselines3.common.env_util import make_vec_env
@@ -52,7 +55,6 @@ class Manager:
 
         # Assigns values to most of the parameters above
         self._verify_config(config_path)
-
 
     def objective(self, trial: optuna.Trial) -> float:
 
@@ -117,8 +119,6 @@ class Manager:
 
     def run(self):
 
-        # TODO create storage and add to study below
-
         # Set pytorch num threads to 1 for faster training.
         torch.set_num_threads(1)
 
@@ -158,17 +158,23 @@ class Manager:
         )
         # This is where the report will be written to
         log_path = os.path.join(self.log_folder, self.alg, report_name)
-        self.logger.info("Writing report to ", log_path)
+        self.logger.info("Writing report to %s", log_path)
 
         # Write report
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         study.trials_dataframe().to_csv(f"{log_path}.csv")
 
-        '''
-        Save python object to inspect/re-use it later
+        '''       
+        Save serialized study object
         with open(f"{log_path}.pkl", "wb+") as f:
             pkl.dump(study, f)
         '''
+
+        # storage_name = "mongodb://localhost:27017/runs?authSource=admin"
+        storage_name = "mongodb://localhost:27017"''
+
+        # Save best trial to MongoDB
+        save_trial(trial=trial, client=storage_name, db='runs', collection="run", study_name=study.study_name)
 
     def _create_logger(self, logger_name) -> None:
         """
@@ -233,11 +239,14 @@ class Manager:
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
+        # Used for finding elements in MongoDB -> name == env + alg
         if 'name' not in data.keys():
-            now = datetime.now()
-            dt_string = 'study_' + now.strftime("%d/%m/%Y_%H:%M:%S")
-            logger.info('No name was specified for the study. Config value "name" set to %s.', dt_string)
-            data.update({'name': dt_string})
+            # now = datetime.now()
+            env = data['env']
+            alg = data['alg']
+            name = env + "_" + alg  # + "_" + now.strftime("%d/%m/%Y_%H:%M:%S")
+            logger.info('No name was specified for the study. Config value "name" set to %s.', name)
+            data.update({'name': name})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
@@ -503,8 +512,8 @@ class Manager:
             return CmaEsSampler(n_startup_trials=n_startup_trials, seed=seed)
         elif sampler == "nsgaii":
             return NSGAIISampler(population_size=self.population_size, mutation_prob=self.mutation_prob,
-                                         crossover_prob=self.crossover_prob, swapping_prob=self.swapping_prob,
-                                         seed=seed)
+                                 crossover_prob=self.crossover_prob, swapping_prob=self.swapping_prob,
+                                 seed=seed)
         elif sampler == "tpe":
             return TPESampler(n_startup_trials=n_startup_trials, seed=seed, multivariate=True)
         elif sampler == "skopt":
@@ -519,32 +528,32 @@ class Manager:
             return SuccessiveHalvingPruner()
         elif pruner == "median":
             return MedianPruner(n_startup_trials=self.n_startup_trials,
-                                       n_warmup_steps=self.n_evaluations // 3,
-                                       # interval_steps=self.eval_freq,  # todo is this checked for in verification?
-                                       n_min_trials=self.n_min_trials)
+                                n_warmup_steps=self.n_evaluations // 3,
+                                # interval_steps=self.eval_freq,  # todo is this checked for in verification?
+                                n_min_trials=self.n_min_trials)
         elif pruner == "patient":
-            return MedianPruner(n_startup_trials=self.n_startup_trials,
+            wrapped_pruner = MedianPruner(n_startup_trials=self.n_startup_trials,
                                           n_warmup_steps=self.n_evaluations // 3,
                                           # interval_steps=self.eval_freq,
                                           n_min_trials=self.n_min_trials)
             return PatientPruner(wrapped_pruner=wrapped_pruner,
-                                        patience=self.patience,
-                                        min_delta=self.min_delta)
+                                 patience=self.patience,
+                                 min_delta=self.min_delta)
         elif pruner == "percentile":
             return PercentilePruner(n_startup_trials=self.n_startup_trials,
-                                           percentile=self.percentile,
-                                           n_warmup_steps=self.n_evaluations // 3,
-                                           # interval_steps=self.eval_freq,
-                                           n_min_trials=self.n_min_trials)
+                                    percentile=self.percentile,
+                                    n_warmup_steps=self.n_evaluations // 3,
+                                    # interval_steps=self.eval_freq,
+                                    n_min_trials=self.n_min_trials)
         elif pruner == "hyperband":
             return HyperbandPruner(min_resource=self.min_resource,  # the number of halving-pruners
-                                          max_resource=self.max_resource,
-                                          reduction_factor=self.reduction_factor,
-                                          bootstrap_count=self.bootstrap_count)
+                                   max_resource=self.max_resource,
+                                   reduction_factor=self.reduction_factor,
+                                   bootstrap_count=self.bootstrap_count)
         elif pruner == "threshold":
             return ThresholdPruner(lower=self.lower,
-                                          upper=self.upper,
-                                          n_warmup_steps=self.n_evaluations // 3)
+                                   upper=self.upper,
+                                   n_warmup_steps=self.n_evaluations // 3)
             # interval_steps=self.eval_freq)
         elif pruner == "none":
             return NopPruner()  # Do not prune
@@ -622,6 +631,68 @@ class Manager:
         return env
 
 
+def save_trial(trial, client, db, collection, study_name):
+
+    # Serialized study object
+    #serialized_trial = loads(trial)
+    pickled_trial = pkl.dumps(trial)
+
+    # Creating connection
+    my_client = pymongo.MongoClient(client)
+
+    # my_db == "runs"
+    my_db = my_client[db]
+
+    # my_collection == "run"
+    my_collection = my_db[collection]
+    info = my_collection.insert_one({'trial': pickled_trial,
+                                     'name': study_name,
+                                     'created_time': time.time(),
+                                     'reward': trial.value})
+
+    print("Saved with id: ", info.inserted_id)
+
+    details = {
+        'inserted_id': info.inserted_id,
+        'model_name': study_name,
+        'created_time': time.time(),
+        'reward': trial.value
+    }
+    return details
+
+
+def load_trial(client, db, collection, study_name, limit=10, direction=1):
+    """
+    :param client: URL (ex: mongodb://localhost:27017)
+    :param db: name of the db to load trial(s) from
+    :param collection: name of the collection to load trial(s) from
+    :param study_name: env_alg (ex: LunarLander-v2_ppo)
+    :param limit: limits the number of documents in the result set.
+    :param direction: 1 sorts ascending, while -1 sorts descending
+    :return:
+    """
+
+    # Creating connection
+    my_client = pymongo.MongoClient(client)
+    my_db = my_client[db]
+
+    # "runs.run"
+    my_collection = my_db[collection]
+
+    if direction == 1:
+        direction = pymongo.ASCENDING
+    else:
+        direction = pymongo.DESCENDING
+
+    # The result set (called cursor in MongoDB)
+    cursor = my_collection.find({'name': study_name}).limit(limit).sort("reward", direction)
+
+    # Converting to json in order to send it to frontend
+    cursor_list = list(cursor)
+    json_data = dumps(cursor_list)
+    print(json_data)
+
+
 def _normalize_if_needed(env: VecEnv, eval_env: bool) -> VecEnv:
     # In eval env: turn off reward normalization and normalization stats updates.
     if eval_env:
@@ -635,7 +706,6 @@ def _get_yaml_val(key) -> None:
     path = 'hp_config.yml'
     stream = open(path, 'r')
     data = yaml.safe_load(stream)
-    # TODO add an if sentence for if the key is 'metric' because it is a dictionary -> discard metric if not needed
     return data[key]
 
 
@@ -645,21 +715,20 @@ def _create_log_folder(path) -> None:
 
 
 if __name__ == '__main__':
-    #################### All these below should be added to the init() method ######################
+    #manager = Manager(log_folder="logs", config_path="hp_config.yml")
+    #manager.run()
 
-    # _create_logger("hp_logger", log_path + "/file.log")
-    # sampler = _create_sampler()
-    # print(sampler)
-    # pruner = _create_pruner()
-    # print(pruner)
-    # _verify_config("hp_config.yml")
+    # todo remove following code:
+    storage_name = "mongodb://localhost:27017"
+    load_trial(client=storage_name, db='runs', collection='run', study_name="LunarLander-v2_ppo")
 
-    # Init()
-    manager = Manager(log_folder="logs", config_path="hp_config.yml")
-
-    # Then run objecti  ve function and study
-    manager.run()
-# todo i dag -> prøv å legge til i databasen!
-#  bruk optuna sin streamhandler til å logge
-#  ha med metoden fra train.py som heter "get_close_matches" (ved valg av env som ikke finnes)
-#  self.optimization_log_path fra objective function i sb3 burde være med når jeg vet at programmet kjører
+#todo future work:
+# Calculate co2 -> will need both start and end time i think. what else is needed?
+# check if there exists entries with the same name (env + alg) that have the same hyperparameters
+#   if so, do not persist to db
+# move save and load methods to their own file -> they should not be here...
+# after persist-methods have been moved, create a "train.py" or something of the sort that takes care of
+#   creating manager, running everything and then persists afterwards.
+# bruk optuna sin streamhandler til å logge
+# ha med metoden fra train.py som heter "get_close_matches" (ved valg av env som ikke finnes)
+# #  self.optimization_log_path fra objective function i sb3 burde være med når jeg vet at programmet kjører

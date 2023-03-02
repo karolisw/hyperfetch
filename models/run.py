@@ -6,11 +6,12 @@ from pydantic.validators import datetime
 
 app = FastAPI()
 
+
 # A response body is the data your API sends to the client
 
 # This is basically the superclass (contains the fields used by all subclasses)
 class BaseRun(BaseModel):
-    co2: float
+    co2: float # todo How to set as float or none? will have to implement later
     start_time: datetime  # send both start and end time in order to calculate tot_time
     end_time: datetime
     algorithm: str

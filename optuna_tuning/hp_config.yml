@@ -14,9 +14,9 @@ n_jobs: 1
 n_min_trials: 1
 n_startup_trials: 5
 n_timesteps: 20000
-n_trials: 10
+n_trials: 1
 n_warmup_steps: 0
-name: study_22/02/2023_14:35:04
+name: LunarLander-v2_ppo
 patience: 50
 percentile: 25.0
 policy: MlpPolicy
