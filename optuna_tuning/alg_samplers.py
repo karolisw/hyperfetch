@@ -317,6 +317,13 @@ def sample_her_params(trial: optuna.Trial, hyperparams: Dict[str, Any]) -> Dict[
     return hyperparams
 
 
+SUPPORTED_ALGORITHMS = [
+    "ppo",
+    "a2c",
+    "dqn",
+    "sac",
+    "td3"
+]
 ALG_HP_SAMPLER = {
     "a2c": sample_a2c_params,
     "dqn": sample_dqn_params,
