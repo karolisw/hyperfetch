@@ -1,22 +1,25 @@
 import os
 import gym
 import yaml
-import json
 import time
 import torch
 import optuna
 import logging
 import pymongo
+import pandas as pd
+
 import pickle as pkl
 import logging.config
-
 from gym import spaces
 from pprint import pprint
 from typing import Optional
+from datetime import datetime
 import motor.motor_asyncio as motor
+from optuna.trial import FrozenTrial
+
 from callbacks import TrialEvalCallback
 from alg_samplers import ALG_HP_SAMPLER
-from bson.json_util import dumps, loads
+from bson.json_util import dumps
 from optuna.integration import SkoptSampler
 from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
 from stable_baselines3.common.env_util import make_vec_env
@@ -47,6 +50,8 @@ def _select_model(alg, **kwargs):
 
 class Manager:
     def __init__(self, log_folder, config_path="hp_config.yml"):
+        self.start_time = datetime.now()
+        self.end_time = datetime.now()
         self.config_path = config_path
 
         # Does not create a new folder if the folder already exists
@@ -118,7 +123,7 @@ class Manager:
 
         return reward
 
-    def run(self):
+    def run(self) -> FrozenTrial:
 
         # Set pytorch num threads to 1 for faster training.
         torch.set_num_threads(1)
@@ -165,17 +170,17 @@ class Manager:
         os.makedirs(os.path.dirname(log_path), exist_ok=True)
         study.trials_dataframe().to_csv(f"{log_path}.csv")
 
-        '''       
-        Save serialized study object
-        with open(f"{log_path}.pkl", "wb+") as f:
-            pkl.dump(study, f)
-        '''
+        # Save the end time of the run
+        self.end_time = datetime.now()
+
+        # Return the best trial
+        return trial
 
         # storage_name = "mongodb://localhost:27017/runs?authSource=admin"
-        storage_name = "mongodb://localhost:27017"
+        # storage = "mongodb://localhost:27017"
 
         # Save best trial to MongoDB
-        self.save_trial(trial=trial, client=storage_name, db='runs', collection="run", study_name=study.study_name)
+        # self.save_trial(trial=trial, client=storage, db='runs', collection="run", study_name=study.study_name)
 
     def _create_logger(self, logger_name) -> None:
         """
@@ -631,40 +636,43 @@ class Manager:
 
         return env
 
-
-    def save_trial(self, trial, client, db, collection, study_name):
+    async def save_trial(self, trial, client, db, collection, study_name):
 
         # Serialized study object
-        #serialized_trial = loads(trial)
         pickled_trial = pkl.dumps(trial)
 
         # Creating connection
-        my_client = motor.AsyncIOMotorClient(client) #todo does this fuck up everything below?
-        # my_client = pymongo.MongoClient(client)
+        my_client = motor.AsyncIOMotorClient(client)
 
         # my_db == "runs"
         my_db = my_client[db]
 
-        # my_collection == "run"
+        # Find the time spent running the algorithm
+        duration = str(self.end_time - self.start_time)
+
+        # Retrieve the most recent entry
+        df = pd.read_csv('emissions.csv')
+        last_row = df.iloc[-1]
+
+        energy_consumed = last_row['energy_consumed']
+        cpu_model = last_row['cpu_model']
+        gpu_model = last_row['gpu_model']
+        emissions = last_row['emissions']
+
         my_collection = my_db[collection]
-        info = my_collection.insert_one({'trial': pickled_trial,
-                                         #'name': study_name,
-                                         'alg' : self.alg,
-                                         'env' : self.env,
-                                         'created_time': time.time(),
-                                         'reward': trial.value})
-
-        print("Saved with id: ", info.inserted_id)
-
-        details = {
-            'inserted_id': info.inserted_id,
-            'model_name': study_name,
-            'created_time': time.time(),
-            'reward': trial.value
-        }
-        return details
+        await my_collection.insert_one({'trial': pickled_trial,
+                                        'name': study_name,
+                                        'energy_consumed': energy_consumed,
+                                        'cpu_model': cpu_model,
+                                        'gpu_model': gpu_model,
+                                        'CO2_emissions': emissions,
+                                        'alg': self.alg,
+                                        'env': self.env,
+                                        'total_time': duration,
+                                        'reward': trial.value})
 
 
+# TODO remove at some point
 def load_trial(client, db, collection, study_name, limit=10, direction=1):
     """
     :param client: URL (ex: mongodb://localhost:27017)
@@ -698,6 +706,7 @@ def load_trial(client, db, collection, study_name, limit=10, direction=1):
     print(json_data)
 
 
+# TODO move to utils
 def _normalize_if_needed(env: VecEnv, eval_env: bool) -> VecEnv:
     # In eval env: turn off reward normalization and normalization stats updates.
     if eval_env:
@@ -707,14 +716,8 @@ def _normalize_if_needed(env: VecEnv, eval_env: bool) -> VecEnv:
     return env
 
 
-def _get_yaml_val(key) -> None:
-    path = 'hp_config.yml'
-    stream = open(path, 'r')
-    data = yaml.safe_load(stream)
-    return data[key]
-
-
 # Creates directory in config-specified folder if it does not already exist.
+# todo move to utils
 def _create_log_folder(path) -> None:
     os.makedirs(path, exist_ok=True)
 
@@ -727,13 +730,11 @@ if __name__ == '__main__':
     storage_name = "mongodb://localhost:27017"
     load_trial(client=storage_name, db='runs', collection='run', study_name="LunarLander-v2_ppo")
 
-#todo future work:
+# todo future work:
+#  gpu_ids must bedded to carboncobfig by checking if nvidua gpu exists and adding that id
 # add calcuclcated co2 (energy_consumed), cpu_model and gpu_model to model and add to db
 # check if there exists entries with the same name (env + alg) that have the same hyperparameters
 #   if so, do not persist to db
-# move save and load methods to their own file -> they should not be here...
-# after persist-methods have been moved, create a "train.py" or something of the sort that takes care of
-#   creating manager, running everything and then persists afterwards.
 # bruk optuna sin streamhandler til å logge
 # ha med metoden fra train.py som heter "get_close_matches" (ved valg av env som ikke finnes)
 # #  self.optimization_log_path fra objective function i sb3 burde være med når jeg vet at programmet kjører

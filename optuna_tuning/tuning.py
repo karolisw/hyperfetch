@@ -1,21 +1,31 @@
-from codecarbon import track_emissions
 from optuna_tuning.manager import Manager
-import torch
+from codecarbon import EmissionsTracker
+import asyncio
+import utils
+
+storage = utils.get_yaml_val("../config/db_config.yml", "storage")
+db = utils.get_yaml_val("../config/db_config.yml", "db")
+collection = utils.get_yaml_val("../config/db_config.yml", "collection")
+
+# Tracks electricity usage in kWh (writes to emissions.csv)
+tracker = EmissionsTracker()
 
 
-@track_emissions()  # writes to emissions.csv
-def tune(log_folder, config_path):
+async def tune(log_folder, config_path):
+    # Starts tracking electricity usage here
+    tracker.start()
+
     manager = Manager(log_folder=log_folder, config_path=config_path)  # todo have i accounted for none-values?
 
-    # Best performing trial is returned
-    results = manager.run()
+    # Best performing trial is returned as FrozenTrial
+    best_trial = manager.run()
 
-    # Convert trial to model # todo should it be converted to model when being persisted or just when loading?
-    # Persist model
+    # Tracking ends here
+    tracker.stop()
+
+    # Post trial with the new tracking data
+    await manager.save_trial(trial=best_trial, client=storage, db=db, collection=collection, study_name=manager.name)
+
 
 if __name__ == "__main__":
-    if torch.cuda.is_available():
-        cuda_id = torch.cuda.current_device()
-        torch.cuda.set_device(cuda_id)
-
-    tune(log_folder="logs", config_path="hp_config.yml")
+    asyncio.run(tune(log_folder="logs", config_path="hp_config.yml"))
