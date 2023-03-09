@@ -1,5 +1,6 @@
 alg: ppo
 bootstrap_count: 0
+#reward_threshold: null
 env: LunarLander-v2
 eval_freq: 10000
 frame_stack: null

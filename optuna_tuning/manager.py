@@ -17,7 +17,8 @@ from datetime import datetime
 import motor.motor_asyncio as motor
 from optuna.trial import FrozenTrial
 
-from callbacks import TrialEvalCallback
+import utils
+from callbacks import TrialEvalCallback, EarlyStoppingCallback
 from alg_samplers import ALG_HP_SAMPLER
 from bson.json_util import dumps
 from optuna.integration import SkoptSampler
@@ -25,7 +26,7 @@ from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped, VecNormalize
+from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
 from optuna.samplers import RandomSampler, GridSampler, TPESampler, CmaEsSampler, NSGAIISampler
 from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
 from optuna.pruners import SuccessiveHalvingPruner, MedianPruner, NopPruner, HyperbandPruner, PercentilePruner, \
@@ -56,12 +57,37 @@ class Manager:
 
         # Does not create a new folder if the folder already exists
         self.log_folder = log_folder
-        _create_log_folder(self.log_folder)
+        utils.create_log_folder(self.log_folder)
         self._create_logger("test_logger")
 
         # Assigns values to most of the parameters above
         self._verify_config(config_path)
 
+    def _create_callbacks(self, trial: optuna.Trial, log_path, eval_env):
+
+        callback_dict = {}
+        callback_list = []
+
+        # Callback that ends entire study if the run performs well enough for the user
+        if self.reward_threshold is not None:
+            early_stop_callback = EarlyStoppingCallback(  # TODO verbose 0
+                reward_threshold=self.reward_threshold, trial=trial, verbose=1)
+            callback_dict['early_stop']: early_stop_callback
+            callback_list.append(early_stop_callback)
+
+        eval_freq_optuna = int(self.n_timesteps / self.n_evaluations)
+
+        # Account for parallel envs
+        eval_freq_optuna = max(eval_freq_optuna // self.n_envs, 1)
+
+        # Callback for periodically evaluating and reporting performance.
+        eval_callback = TrialEvalCallback(
+            eval_env=eval_env, trial=trial, log_path=log_path, n_eval_episodes=self.n_evaluations,
+            eval_freq=eval_freq_optuna, deterministic=True)
+        callback_dict['eval']: eval_callback
+        callback_list.append(eval_callback)
+
+        return callback_dict, callback_list
     def objective(self, trial: optuna.Trial) -> float:
 
         # Creating an environment for the model
@@ -79,24 +105,17 @@ class Manager:
 
         # Creating evaluation env
         eval_env = self.create_envs(n_envs=self.n_envs, eval_env=True)
-        eval_freq_optuna = int(self.n_timesteps / self.n_evaluations)
-
-        # Account for parallel envs
-        eval_freq_optuna = max(eval_freq_optuna // self.n_envs, 1)
 
         # The user can state that the path is None in config to avoid logging
         path = None
         if self.trial_log_path is not None:
             path = os.path.join(self.trial_log_path, "trial_" + str(trial.number))
 
-        # Create the callback that will periodically evaluate and report the performance.
-        eval_callback = TrialEvalCallback(
-            eval_env=eval_env, trial=trial, log_path=path, n_eval_episodes=self.n_evaluations,
-            eval_freq=eval_freq_optuna, deterministic=True)
+        # Dictionary of callbacks passed to learn method
+        callback_dict, callback_list = self._create_callbacks(trial=trial, log_path=path, eval_env=eval_env)
 
         try:
-
-            model.learn(self.n_timesteps, callback=eval_callback)  # edit callback to use the same numbers as others
+            model.learn(self.n_timesteps, callback=callback_list)
             # Free memory
             model.env.close()
             eval_env.close()
@@ -112,8 +131,8 @@ class Manager:
             raise optuna.exceptions.TrialPruned()
 
         # Return the mean reward of the trial
-        is_pruned = eval_callback.is_pruned
-        reward = eval_callback.last_mean_reward
+        is_pruned = callback_dict['eval'].is_pruned
+        reward = callback_dict['eval'].last_mean_reward
 
         del model.env, eval_env
         del model
@@ -233,6 +252,12 @@ class Manager:
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
+        if 'reward_threshold' not in data.keys():
+            logger.info('"reward_threshold" not specified. Callback for stopping on specified reward will not be used.')
+            data.update({'reward_threshold': None})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
+
         if 'n_envs' not in data.keys():
             logger.info('No n_envs was specified. Config value "n_envs" set to 1.')
             data.update({'n_envs': 1})
@@ -346,6 +371,7 @@ class Manager:
         self.alg = data['alg']
         self.env = data['env']
         self.policy = data['policy']
+        self.reward_threshold = data['reward_threshold']
         self.n_envs = data['n_envs']
         self.frame_stack = data['frame_stack']
         self.name = data['name']
@@ -535,7 +561,7 @@ class Manager:
         elif pruner == "median":
             return MedianPruner(n_startup_trials=self.n_startup_trials,
                                 n_warmup_steps=self.n_evaluations // 3,
-                                # interval_steps=self.eval_freq,  # todo is this checked for in verification?
+                                # interval_steps=self.eval_freq,
                                 n_min_trials=self.n_min_trials)
         elif pruner == "patient":
             wrapped_pruner = MedianPruner(n_startup_trials=self.n_startup_trials,
@@ -607,7 +633,7 @@ class Manager:
 
         # Wrap the env into a VecNormalize wrapper if needed
         # and load saved statistics when present
-        # env = _normalize_if_needed(env, eval_env)
+        env = utils.normalize_if_needed(env, eval_env) #todo comment out if fails
 
         # Optional Frame-stacking
         if self.frame_stack is not None:
@@ -706,35 +732,10 @@ def load_trial(client, db, collection, study_name, limit=10, direction=1):
     print(json_data)
 
 
-# TODO move to utils
-def _normalize_if_needed(env: VecEnv, eval_env: bool) -> VecEnv:
-    # In eval env: turn off reward normalization and normalization stats updates.
-    if eval_env:
-        env = VecNormalize(env, norm_reward=False, training=False)
-    else:
-        env = VecNormalize(env)
-    return env
-
-
-# Creates directory in config-specified folder if it does not already exist.
-# todo move to utils
-def _create_log_folder(path) -> None:
-    os.makedirs(path, exist_ok=True)
-
-
 if __name__ == '__main__':
     manager = Manager(log_folder="logs", config_path="hp_config.yml")
     manager.run()
 
-    # todo remove following code:
-    storage_name = "mongodb://localhost:27017"
-    load_trial(client=storage_name, db='runs', collection='run', study_name="LunarLander-v2_ppo")
+    # storage_name = "mongodb://localhost:27017"
+    # load_trial(client=storage_name, db='runs', collection='run', study_name="LunarLander-v2_ppo")
 
-# todo future work:
-#  gpu_ids must bedded to carboncobfig by checking if nvidua gpu exists and adding that id
-# add calcuclcated co2 (energy_consumed), cpu_model and gpu_model to model and add to db
-# check if there exists entries with the same name (env + alg) that have the same hyperparameters
-#   if so, do not persist to db
-# bruk optuna sin streamhandler til å logge
-# ha med metoden fra train.py som heter "get_close_matches" (ved valg av env som ikke finnes)
-# #  self.optimization_log_path fra objective function i sb3 burde være med når jeg vet at programmet kjører
