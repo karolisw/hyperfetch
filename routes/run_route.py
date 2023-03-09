@@ -13,6 +13,7 @@ import utils
 # prefix: start of every decorator provided by fastapi in this particular page
 # tags: the functionality of this category
 router = APIRouter(prefix='/runs', tags=['crud/rest'])
+
 storage = utils.get_yaml_val("../config/db_config.yml", "storage")
 db = utils.get_yaml_val("../config/db_config.yml", "db")
 collection = utils.get_yaml_val("../config/db_config.yml", "collection")
@@ -31,20 +32,6 @@ async def create_run(request: Request, run: BaseRun):
     return created_run
 
 
-# TODO the get requests are needed
-'''
-@router.post("/", response_description="Create a new book", status_code=status.HTTP_201_CREATED, response_model=Book)
-def create_book(request: Request, book: Book = Body(...)):
-    book = jsonable_encoder(book)
-    new_book = request.app.database["books"].insert_one(book)
-    created_book = request.app.database["books"].find_one(
-        {"_id": new_book.inserted_id}
-    )
-
-    return created_book
-'''
-
-
 @router.get("/env", response_description="List the top trial for each algorithm for selected env",
             response_model=List[BaseRun])
 async def list_runs_for_env(env: str):
@@ -56,24 +43,22 @@ async def list_runs_for_env(env: str):
     # A for loop that queries for each alg
     for index in range(len(algs)):
         # todo add check for if exists here
-        cursor = collection.find({'env': env, 'alg': algs[index]}).sort("reward", -1).limit(1)
-        # Add the found trial to a list to be returned
-        runs[index] = cursor
+        # todo should i have await before find?
+        if (run := await collection.find({'env': env, 'alg': algs[index]}).sort("reward", -1).limit(1)) is not None:
+            # Add the found trial to a list to be returned
+            runs[index] = run
 
     return runs
 
 
-@router.get("/env/alg", response_description="List the top trials for selected algorithm x env combo",
-            response_model=List[BaseRun])
-async def list_runs_for_env_alg(env: str, alg: str, limit: int):
+@router.get("/env/alg", response_description="List the top trials for selected algorithm x env combo")
+async def list_runs_for_env_alg(env: str, alg: str, limit: int) -> List[BaseRun]:
     runs = await collection.find({'env': env, 'alg': alg}).sort("reward", -1).limit(limit).tolist()
-
     return runs
 
 
-@router.get(
-    "/{id}", response_description="Get a single run", response_model=BaseRun)
-async def show_run(id: str):
+@router.get("/{id}", response_description="Get a single run")
+async def show_run(id: str) -> BaseRun:
     if (run := await collection.find_one({"_id": id})) is not None:
         return run
 
