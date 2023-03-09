@@ -23,8 +23,12 @@ async def tune(log_folder, config_path):
     # Tracking ends here
     tracker.stop()
 
-    # Post trial with the new tracking data
-    await manager.save_trial(trial=best_trial, client=storage, db=db, collection=collection, study_name=manager.name)
+    # Post trial along with the tracking data if the user wishes to
+    if manager.post_run:
+        await manager.save_trial(
+            trial=best_trial, client=storage, db=db,
+            collection=collection, study_name=manager.name
+        )
 
 
 if __name__ == "__main__":

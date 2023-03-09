@@ -1,6 +1,5 @@
 alg: ppo
 bootstrap_count: 0
-#reward_threshold: null
 env: LunarLander-v2
 eval_freq: 10000
 frame_stack: null
@@ -21,8 +20,10 @@ name: LunarLander-v2_ppo
 patience: 50
 percentile: 25.0
 policy: MlpPolicy
+#post_run: True
 pruner: median
 reduction_factor: 3.0
+#reward_threshold: null
 sampler: tpe
 seed: 1
 trial_log_path: logs/trials

@@ -258,6 +258,13 @@ class Manager:
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
+        if 'post_run' not in data.keys():
+            logger.info('Whether or not to "post_run" was not specified. Config value "post_run" set to True.')
+            data.update({'post_run': True})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
+
+
         if 'n_envs' not in data.keys():
             logger.info('No n_envs was specified. Config value "n_envs" set to 1.')
             data.update({'n_envs': 1})
@@ -372,6 +379,7 @@ class Manager:
         self.env = data['env']
         self.policy = data['policy']
         self.reward_threshold = data['reward_threshold']
+        self.post_run = data['post_run']
         self.n_envs = data['n_envs']
         self.frame_stack = data['frame_stack']
         self.name = data['name']
