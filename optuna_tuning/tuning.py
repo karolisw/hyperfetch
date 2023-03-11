@@ -15,7 +15,7 @@ async def tune(log_folder, config_path):
     # Starts tracking electricity usage here
     tracker.start()
 
-    manager = Manager(log_folder=log_folder, config_path=config_path)  # todo have i accounted for none-values?
+    manager = Manager(config_path=config_path)
 
     # Best performing trial is returned as FrozenTrial
     best_trial = manager.run()

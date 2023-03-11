@@ -5,6 +5,20 @@ from stable_baselines3.common.logger import TensorBoardOutputFormat
 from stable_baselines3.common.vec_env import VecEnv
 
 
+class ThresholdExceeded(optuna.exceptions.OptunaError):
+    pass
+
+
+def check_threshold(study: optuna.study, trial, reward_threshold):
+    try:
+        if study.best_value < reward_threshold:
+            raise ThresholdExceeded()
+    # ValueError in the start because there is no study.best value before any trials are run
+    except ValueError:
+        pass
+    return
+
+
 class EarlyStoppingCallback(StopTrainingOnRewardThreshold):
     def __init__(
             self,
@@ -19,10 +33,11 @@ class EarlyStoppingCallback(StopTrainingOnRewardThreshold):
         self.trial = trial
 
     def _on_step(self) -> bool:
-        continue_training = super()._on_step()
-
+        # continue_training = super()._on_step()
+        continue_training = self.trial.study.best_trial.value < self.reward_threshold  # true when best value smaller than reward threshold
         # If the reward is good enough, the whole study stops
         if not continue_training:
+            print("trying to stop trial")
             self.trial.study.stop()
             return False
 
@@ -44,6 +59,9 @@ class TrialEvalCallback(EvalCallback):
             verbose: int = 0,
             best_model_save_path: Optional[str] = None,
             log_path: Optional[str] = None,
+            callback_on_new_best=None,
+            reward_threshold=None
+
     ) -> None:
         super().__init__(
             eval_env=eval_env,
@@ -52,11 +70,13 @@ class TrialEvalCallback(EvalCallback):
             deterministic=deterministic,
             verbose=verbose,
             best_model_save_path=best_model_save_path,
-            log_path=log_path,
+            log_path=log_path
+            # callback_on_new_best=callback_on_new_best
         )
         self.trial = trial
         self.eval_idx = 0
         self.is_pruned = False
+        # self.reward_threshold = reward_threshold
 
     def _on_step(self) -> bool:
         if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:
@@ -68,6 +88,14 @@ class TrialEvalCallback(EvalCallback):
             if self.trial.should_prune():
                 self.is_pruned = True
                 return False
+            '''
+            elif self.reward_threshold is not None:
+                # Early stop if reward threshold reached
+                print("best value: ", self.trial.study.best_value)
+                if self.trial.study.best_value > self.reward_threshold:
+                    self.trial.study.stop() #todo could work if i pass study instead of trial?
+                    return False
+            '''
         return True
 
 

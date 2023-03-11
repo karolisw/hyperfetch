@@ -18,7 +18,7 @@ import motor.motor_asyncio as motor
 from optuna.trial import FrozenTrial
 
 import utils
-from callbacks import TrialEvalCallback, EarlyStoppingCallback
+from callbacks import TrialEvalCallback, check_threshold, ThresholdExceeded
 from alg_samplers import ALG_HP_SAMPLER
 from bson.json_util import dumps
 from optuna.integration import SkoptSampler
@@ -50,44 +50,40 @@ def _select_model(alg, **kwargs):
 
 
 class Manager:
-    def __init__(self, log_folder, config_path="hp_config.yml"):
+    def __init__(self, config_path):
+        '''
+        :param config_path: Must be specified to avoid error
+
+        '''
         self.start_time = datetime.now()
         self.end_time = datetime.now()
         self.config_path = config_path
 
-        # Does not create a new folder if the folder already exists
-        self.log_folder = log_folder
-        utils.create_log_folder(self.log_folder)
-        self._create_logger("test_logger")
-
         # Assigns values to most of the parameters above
-        self._verify_config(config_path)
+        self._preprocess_args(config_path)
 
-    def _create_callbacks(self, trial: optuna.Trial, log_path, eval_env):
-
-        callback_dict = {}
-        callback_list = []
-
-        # Callback that ends entire study if the run performs well enough for the user
-        if self.reward_threshold is not None:
-            early_stop_callback = EarlyStoppingCallback(  # TODO verbose 0
-                reward_threshold=self.reward_threshold, trial=trial, verbose=1)
-            callback_dict['early_stop']: early_stop_callback
-            callback_list.append(early_stop_callback)
+    def _create_callback(self, trial: optuna.Trial, log_path, eval_env):
 
         eval_freq_optuna = int(self.n_timesteps / self.n_evaluations)
 
         # Account for parallel envs
         eval_freq_optuna = max(eval_freq_optuna // self.n_envs, 1)
 
-        # Callback for periodically evaluating and reporting performance.
-        eval_callback = TrialEvalCallback(
-            eval_env=eval_env, trial=trial, log_path=log_path, n_eval_episodes=self.n_evaluations,
-            eval_freq=eval_freq_optuna, deterministic=True)
-        callback_dict['eval']: eval_callback
-        callback_list.append(eval_callback)
+        # Callback that ends entire study if the run performs well enough for the user
+        if self.reward_threshold is not None:
 
-        return callback_dict, callback_list
+            # Callback for periodically evaluating and reporting performance.
+            eval_callback = TrialEvalCallback(
+                eval_env=eval_env, trial=trial, log_path=log_path, n_eval_episodes=self.n_evaluations,
+                eval_freq=eval_freq_optuna, deterministic=True)
+        else:
+            # Without early stopping
+            eval_callback = TrialEvalCallback(
+                eval_env=eval_env, trial=trial, log_path=log_path, n_eval_episodes=self.n_evaluations,
+                eval_freq=eval_freq_optuna, deterministic=True)
+
+        return eval_callback
+
     def objective(self, trial: optuna.Trial) -> float:
 
         # Creating an environment for the model
@@ -112,10 +108,10 @@ class Manager:
             path = os.path.join(self.trial_log_path, "trial_" + str(trial.number))
 
         # Dictionary of callbacks passed to learn method
-        callback_dict, callback_list = self._create_callbacks(trial=trial, log_path=path, eval_env=eval_env)
+        eval_callback = self._create_callback(trial=trial, log_path=path, eval_env=eval_env)
 
         try:
-            model.learn(self.n_timesteps, callback=callback_list)
+            model.learn(self.n_timesteps, callback=eval_callback)
             # Free memory
             model.env.close()
             eval_env.close()
@@ -131,8 +127,8 @@ class Manager:
             raise optuna.exceptions.TrialPruned()
 
         # Return the mean reward of the trial
-        is_pruned = callback_dict['eval'].is_pruned
-        reward = callback_dict['eval'].last_mean_reward
+        is_pruned = eval_callback.is_pruned
+        reward = eval_callback.last_mean_reward
 
         del model.env, eval_env
         del model
@@ -143,6 +139,15 @@ class Manager:
         return reward
 
     def run(self) -> FrozenTrial:
+
+        def check_threshold(study: optuna.study, trial):
+            try:
+                if study.best_value > self.reward_threshold:
+                    raise ThresholdExceeded()
+            # ValueError in the start because there is no study.best value before any trials are run
+            except ValueError:
+                pass
+            return
 
         # Set pytorch num threads to 1 for faster training.
         torch.set_num_threads(1)
@@ -158,9 +163,13 @@ class Manager:
         study = optuna.create_study(sampler=sampler, pruner=pruner, study_name=self.name,
                                     direction="maximize")
         try:
-            study.optimize(self.objective, n_jobs=self.n_jobs, n_trials=self.n_trials)  # , timeout=600)
-        except KeyboardInterrupt:
-            pass
+            if self.reward_threshold is None:
+                study.optimize(self.objective, n_jobs=self.n_jobs, n_trials=self.n_trials)  # , timeout=600)
+            else:
+                study.optimize(self.objective, n_jobs=self.n_jobs, n_trials=self.n_trials,
+                               callbacks=[check_threshold])  # todo remove the reward threshold from here
+        except ThresholdExceeded:
+            print('Threshold exceeded: {} > {}'.format(study.best_value, self.reward_threshold))
 
         print("Number of finished trials: ", len(study.trials))
 
@@ -230,12 +239,23 @@ class Manager:
         # Add to self
         self.logger = logger
 
-    def _verify_config(self, path_to_config) -> None:
+    def _preprocess_args(self, path_to_config) -> None:
         if (not os.path.isfile(path_to_config)) or (not path_to_config.endswith('.yml')):
             logger.error("There is no .yml file at %s", path_to_config, stack_info=True)
 
         stream = open(path_to_config, 'r')
         data = yaml.safe_load(stream)  # dict
+
+        if 'log_folder' not in data.keys():  # todo cannot log this here
+            data.update({'log_folder': 'logs'})
+            with open(path_to_config, "w") as writer:
+                yaml.safe_dump(data, writer)
+
+        # Create the logger and log folder (unless it exists)
+        self.log_folder = data['log_folder']
+        utils.create_log_folder(self.log_folder)
+        self._create_logger("test_logger")
+        logger.info('Path to log folder: "{}"'.format(self.log_folder))
 
         if 'alg' not in data.keys():
             logger.error("An algorithm 'alg' must be specified in config at path %s",
@@ -247,7 +267,7 @@ class Manager:
 
         policy_list = {"MlpPolicy", "CnnPolicy", "MultiInputPolicy"}
         if 'policy' not in data.keys() or 'policy' not in policy_list:
-            logger.info('No policy was specified. Config value "policy" set to "MlpPolicy".')
+            logger.info('No policy was specified. Config value "policy" set to "MlpPolicy"')
             data.update({'policy': 'MlpPolicy'})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
@@ -263,7 +283,6 @@ class Manager:
             data.update({'post_run': True})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
-
 
         if 'n_envs' not in data.keys():
             logger.info('No n_envs was specified. Config value "n_envs" set to 1.')
@@ -309,12 +328,6 @@ class Manager:
         if 'n_startup_trials' not in data.keys():
             logger.info('No n_startup_trials was specified. Config value "n_startup_trials" set to 0.')
             data.update({'n_startup_trials': 0})
-            with open(path_to_config, "w") as writer:
-                yaml.safe_dump(data, writer)
-
-        if 'log_folder' not in data.keys():
-            logger.info('No log_folder was specified. Config value "log_folder" set to "logs".')
-            data.update({'log_folder': 'logs'})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
@@ -387,7 +400,6 @@ class Manager:
         self.pruner = data['pruner']
         self.seed = data['seed']
         self.n_startup_trials = data['n_startup_trials']
-        self.log_folder = data['log_folder']
         self.trial_log_path = data['trial_log_path']
         self.n_timesteps = data['n_timesteps']
         self.n_jobs = data['n_jobs']
@@ -473,7 +485,7 @@ class Manager:
                 with open(path_to_config, "w") as writer:
                     yaml.safe_dump(data, writer)
             self.max_resource = data['max_resource']
-            self.min_resource = data['min_delta']
+            self.min_resource = data['min_resource']
             self.reduction_factor = data['reduction_factor']
             self.bootstrap_count = data['bootstrap_count']
 
@@ -641,7 +653,7 @@ class Manager:
 
         # Wrap the env into a VecNormalize wrapper if needed
         # and load saved statistics when present
-        env = utils.normalize_if_needed(env, eval_env) #todo comment out if fails
+        env = utils.normalize_if_needed(env, eval_env)  # todo comment out if fails
 
         # Optional Frame-stacking
         if self.frame_stack is not None:
@@ -714,7 +726,7 @@ def load_trial(client, db, collection, study_name, limit=10, direction=1):
     :param collection: name of the collection to load trial(s) from
     :param study_name: env_alg (ex: LunarLander-v2_ppo)
     :param limit: limits the number of documents in the result set.
-    :param direction: 1 sorts ascending, while -1 sorts descending
+    :param direction: 1=sort ascending, while -1=sort descending
     :return:
     """
 
@@ -741,9 +753,8 @@ def load_trial(client, db, collection, study_name, limit=10, direction=1):
 
 
 if __name__ == '__main__':
-    manager = Manager(log_folder="logs", config_path="hp_config.yml")
+    manager = Manager(config_path="hp_config.yml")
     manager.run()
 
     # storage_name = "mongodb://localhost:27017"
     # load_trial(client=storage_name, db='runs', collection='run', study_name="LunarLander-v2_ppo")
-
