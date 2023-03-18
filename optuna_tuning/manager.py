@@ -35,6 +35,15 @@ from optuna.pruners import SuccessiveHalvingPruner, MedianPruner, NopPruner, Hyp
 logger: Optional[
     logging.Logger] = None  # logger configured during init() #todo probably not necessary for this to be global
 
+# A global client that can be access from anywhere in the project
+storage = utils.get_yaml_val("../config/db_config.yml", "storage")
+db = utils.get_yaml_val("../config/db_config.yml", "db")
+collection = utils.get_yaml_val("../config/db_config.yml", "collection")
+
+client = motor.AsyncIOMotorClient(storage)
+db = client[db]
+collection = client[collection]
+
 
 def _select_model(alg, **kwargs):
     if alg == "ppo":

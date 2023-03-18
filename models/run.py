@@ -52,8 +52,6 @@ class BaseRun(BaseModel):
             }
         }
 
-
-
 # todo if this run is the best run up until now and there is a similarly good run in the db,
 #  i should not post this run if the hyperparameteres of both runs are the same...
 
