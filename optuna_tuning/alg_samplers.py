@@ -1,3 +1,4 @@
+# type: ignore
 from typing import Any, Dict
 
 import numpy as np
@@ -324,6 +325,7 @@ SUPPORTED_ALGORITHMS = [
     "sac",
     "td3"
 ]
+
 ALG_HP_SAMPLER = {
     "a2c": sample_a2c_params,
     "dqn": sample_dqn_params,

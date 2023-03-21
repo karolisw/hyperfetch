@@ -1,7 +1,7 @@
 from optuna_tuning.manager import Manager
 from codecarbon import EmissionsTracker
 import asyncio
-import utils
+from utils import common
 
 storage = utils.get_yaml_val("../config/db_config.yml", "storage")
 db = utils.get_yaml_val("../config/db_config.yml", "db")

@@ -1,51 +1,45 @@
-import os
-import gym
-import yaml
-import time
-import torch
-import optuna
+# type: ignore
 import logging
-import pymongo
-import pandas as pd
-
-import pickle as pkl
 import logging.config
-from gym import spaces
-from pprint import pprint
-from typing import Optional
+import os
+import time
 from datetime import datetime
+from pprint import pprint
+import gym
 import motor.motor_asyncio as motor
-from optuna.trial import FrozenTrial
-
-import utils
-from callbacks import TrialEvalCallback, check_threshold, ThresholdExceeded
-from alg_samplers import ALG_HP_SAMPLER
+import optuna
+import pandas as pd
+import pymongo
+import torch
+import yaml
 from bson.json_util import dumps
+from gym import spaces
 from optuna.integration import SkoptSampler
-from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
-from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.vec_env.base_vec_env import VecEnv
-from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
-from optuna.samplers import RandomSampler, GridSampler, TPESampler, CmaEsSampler, NSGAIISampler
-from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
 from optuna.pruners import SuccessiveHalvingPruner, MedianPruner, NopPruner, HyperbandPruner, PercentilePruner, \
     PatientPruner, ThresholdPruner
-
-logger: Optional[
-    logging.Logger] = None  # logger configured during init() #todo probably not necessary for this to be global
+from optuna.samplers import RandomSampler, GridSampler, TPESampler, CmaEsSampler, NSGAIISampler
+from optuna.trial import FrozenTrial
+from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
+from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
+from stable_baselines3.common.vec_env.base_vec_env import VecEnv
+from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
+from utils import common
+from optuna_tuning.alg_samplers import ALG_HP_SAMPLER
+from optuna_tuning.callbacks import TrialEvalCallback, ThresholdExceeded
 
 # A global client that can be access from anywhere in the project
-storage = utils.get_yaml_val("../config/db_config.yml", "storage")
-db = utils.get_yaml_val("../config/db_config.yml", "db")
-collection = utils.get_yaml_val("../config/db_config.yml", "collection")
+storage = utils.get_yaml_val("config/db_config.yml", "storage")
+db = utils.get_yaml_val("config/db_config.yml", "db")
+collection = utils.get_yaml_val("config/db_config.yml", "collection")
 
 client = motor.AsyncIOMotorClient(storage)
 db = client[db]
 collection = client[collection]
 
 
-def _select_model(alg, **kwargs):
+def _select_model(alg, **kwargs) :
     if alg == "ppo":
         return PPO(**kwargs)
     elif alg == "dqn":
@@ -691,10 +685,7 @@ class Manager:
 
         return env
 
-    async def save_trial(self, trial, client, db, collection, study_name):
-
-        # Serialized study object
-        pickled_trial = pkl.dumps(trial)
+    async def save_trial(self, trial, client, db, collection, study_name) -> None:
 
         # Creating connection
         my_client = motor.AsyncIOMotorClient(client)
@@ -715,7 +706,7 @@ class Manager:
         emissions = last_row['emissions']
 
         my_collection = my_db[collection]
-        await my_collection.insert_one({'trial': pickled_trial,
+        await my_collection.insert_one({'trial': trial.params,
                                         'name': study_name,
                                         'energy_consumed': energy_consumed,
                                         'cpu_model': cpu_model,
