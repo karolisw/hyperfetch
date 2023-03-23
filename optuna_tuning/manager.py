@@ -1,8 +1,6 @@
 # type: ignore
 import logging
 import logging.config
-import os
-import time
 from datetime import datetime
 from pprint import pprint
 import gym
@@ -11,7 +9,7 @@ import optuna
 import pandas as pd
 import pymongo
 import torch
-import yaml
+from models.create_run import RunCreate
 from bson.json_util import dumps
 from gym import spaces
 from optuna.integration import SkoptSampler
@@ -23,21 +21,10 @@ from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
 from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
-from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from utils import common
+from utils.common import *
 from optuna_tuning.alg_samplers import ALG_HP_SAMPLER
 from optuna_tuning.callbacks import TrialEvalCallback, ThresholdExceeded
-
-# A global client that can be access from anywhere in the project
-storage = utils.get_yaml_val("config/db_config.yml", "storage")
-db = utils.get_yaml_val("config/db_config.yml", "db")
-collection = utils.get_yaml_val("config/db_config.yml", "collection")
-
-client = motor.AsyncIOMotorClient(storage)
-db = client[db]
-collection = client[collection]
-
 
 def _select_model(alg, **kwargs) :
     if alg == "ppo":
@@ -191,7 +178,7 @@ class Manager:
 
         report_name = (
             f"report_{self.env}_{self.n_trials}-trials-{self.n_timesteps}"
-            f"-{self.sampler}-{self.pruner}_{int(time.time())}"
+            f"-{self.sampler}-{self.pruner}_{int(time())}"
         )
         # This is where the report will be written to
         log_path = os.path.join(self.log_folder, self.alg, report_name)
@@ -256,7 +243,7 @@ class Manager:
 
         # Create the logger and log folder (unless it exists)
         self.log_folder = data['log_folder']
-        utils.create_log_folder(self.log_folder)
+        create_log_folder(self.log_folder)
         self._create_logger("test_logger")
         logger.info('Path to log folder: "{}"'.format(self.log_folder))
 
@@ -656,7 +643,7 @@ class Manager:
 
         # Wrap the env into a VecNormalize wrapper if needed
         # and load saved statistics when present
-        env = utils.normalize_if_needed(env, eval_env)  # todo comment out if fails
+        env = normalize_if_needed(env, eval_env)  # todo comment out if fails
 
         # Optional Frame-stacking
         if self.frame_stack is not None:
@@ -690,9 +677,6 @@ class Manager:
         # Creating connection
         my_client = motor.AsyncIOMotorClient(client)
 
-        # my_db == "runs"
-        my_db = my_client[db]
-
         # Find the time spent running the algorithm
         duration = str(self.end_time - self.start_time)
 
@@ -705,17 +689,25 @@ class Manager:
         gpu_model = last_row['gpu_model']
         emissions = last_row['emissions']
 
-        my_collection = my_db[collection]
-        await my_collection.insert_one({'trial': trial.params,
-                                        'name': study_name,
-                                        'energy_consumed': energy_consumed,
-                                        'cpu_model': cpu_model,
-                                        'gpu_model': gpu_model,
-                                        'CO2_emissions': emissions,
-                                        'alg': self.alg,
-                                        'env': self.env,
-                                        'total_time': duration,
-                                        'reward': trial.value})
+        print("Creating dict...")
+
+        run = {'_id': get_uuid(),
+               'trial': trial.params,
+                'name': study_name,
+                'energy_consumed': energy_consumed,
+                'cpu_model': cpu_model,
+                'gpu_model': gpu_model,
+                'CO2_emissions': emissions,
+                'alg': self.alg,
+                'env': self.env,
+                'total_time': duration,
+                'reward': trial.value}
+
+
+        print("Posting...")
+
+        await my_client[db][collection].insert_one(run)
+        print("Posted!")
 
 
 # TODO remove at some point

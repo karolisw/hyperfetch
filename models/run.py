@@ -3,14 +3,14 @@ from bson import ObjectId
 from models.pyObjectId import PyObjectId
 from pydantic import Field
 from typing import Dict, Union, List
-import RWModel
+from models.RWModel import RWModel
 
 
 class BaseRun(RWModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     trial: Dict[str, Union[str, float]]
     name: str
-    energy_comsumed: float
+    energy_consumed: float
     cpu_model: str
     gpu_model: str
     CO2_emissions: float
