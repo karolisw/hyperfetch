@@ -109,7 +109,7 @@ export default {
   <h3>Step 3: View stats for run</h3>
   <ag-grid-vue id="stats"
   @grid-ready="onGridReadyStats"
-  style="width: 450px; height: 300px"
+  style="width: 50vh; height: 40vh"
   class="ag-theme-alpine"
   :defaultColDef="defaultColDef"
   :columnDefs="columnStats"
@@ -120,7 +120,7 @@ export default {
   <h3>Step 4: View hyperparameters for run</h3>
   <ag-grid-vue id="hyperparameters"
   @grid-ready="onGridReadyHyperparameters"
-  style="width: 450px; height: 300px"
+  style="width: 50vh; height: 40vh"
   class="ag-theme-alpine"
   :defaultColDef="defaultColDef"
   :columnDefs="columnParams"
@@ -137,6 +137,10 @@ export default {
   --ag-font-size: 15px;
 }
 
+.run-stats {
+  margin-top: 5%;
+}
+
 .run-stats, #stats {
   --ag-foreground-color: rgb(57, 59, 51);
   --ag-background-color: rgb(255, 237, 184);
@@ -147,6 +151,7 @@ export default {
 }
 
 .ag-theme-alpine, #hyperparameters {
+  --ag-border-color:rgb(57, 59, 51);
   --ag-foreground-color: rgb(57, 59, 51);
   --ag-background-color: rgb(255, 223, 209);
   --ag-header-foreground-color: rgb(57, 59, 51);
@@ -157,11 +162,10 @@ export default {
 
 
 .run-stats #stats {
-  margin-bottom: 15%;
+  margin-bottom: 3%;
 }
 
 .run-stats, .run-hyperparameters {
-  padding-left: 5%;
 }
 
 </style>

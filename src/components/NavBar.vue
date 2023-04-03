@@ -71,7 +71,7 @@
   
 <style lang="scss" scoped>
 header {
-    background-color: rgba(0,0,0,0.8);
+    background-color: #333333;
     z-index: 99;
     width: 100%;
     position:relative;

@@ -81,7 +81,6 @@ export default createStore({
             response = await service.fetchEnvironments()
             .then(response => {
                 commit('SET_ENVS', response.data)
-                console.log('Successfully fetched: ' + this.state.envs.length + " environments from db") 
             })
         } catch (error) {
             console.log('Could not get envs from db with error: ' + error)
@@ -145,7 +144,6 @@ export default createStore({
                 //console.log("response: ", response)
                 //response.data.reward = parseFloat(response.data.reward).toFixed(6)
                 commit('SET_RUNS', response.data)
-                console.log('Successfully loaded ' + state.runs.length + ' runs for '+ params.alg)
             })
         } catch (error) {
             console.log('Could not get runs for '+ params.alg + ' with error: ' + error)

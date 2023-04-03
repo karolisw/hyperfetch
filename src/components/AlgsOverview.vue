@@ -60,7 +60,7 @@ export default {
     async onSelectAlgorithm() { 
       const selectedRows = this.gridApi.getSelectedRows() 
 
-      document.querySelector('#selectedRows1').innerHTML = selectedRows.length === 1 ? selectedRows[0].full : ''
+      // document.querySelector('#selectedRows1').innerHTML = selectedRows.length === 1 ? selectedRows[0].full : ''
 
       // Telling the parent of this component that an algorithm has been selected and that runs can be shown
       this.showRuns = true  
@@ -88,16 +88,17 @@ export default {
 
 <template>
 <div class="algContainer" id="selectedRows1">
-  <h3>Step 1: Select your algorithm</h3>
+  <h2>Step 1: Select your algorithm</h2>
   <ag-grid-vue 
   @grid-ready="onGridReady"
   @selection-changed="onSelectAlgorithm"
-  style="width: 500px; height: 300px"
+  style="width: 90vh; height: 35vh;"
   class="ag-theme-alpine"
   :rowSelection="rowSelection"
   :columnDefs="columnDefs"
   :defaultColDef="defaultColDef"
-  :rowData="rowData">
+  :rowData="rowData"
+>
   </ag-grid-vue>
   
 </div>
@@ -106,12 +107,13 @@ export default {
 <style scss scoped >
 
 .ag-theme-alpine {
+  --ag-border-color:rgb(57, 59, 51);
   --ag-secondary-border-color: none;
   --ag-font-size: 15px;
   --ag-foreground-color: rgb(57, 59, 51);
-  --ag-background-color: rgb(249, 245, 227);
+  --ag-background-color: rgb(235, 255, 212);
   --ag-header-foreground-color: rgb(57, 59, 51);
-  --ag-header-background-color: rgb(252, 246, 129);
+  --ag-header-background-color: rgb(217, 253, 160);
   --ag-odd-row-background-color: rgb(0, 0, 0, 0.03);
   --ag-header-column-resize-handle-color: rgb(74, 74, 224);
 }
