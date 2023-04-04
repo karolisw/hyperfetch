@@ -164,7 +164,7 @@ export default {
 
 </template>
 
-<style scss scoped>
+<style lang="scss" scoped>
 .ag-theme-alpine {
   --ag-border-color:rgb(57, 59, 51);
 

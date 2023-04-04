@@ -105,40 +105,42 @@ export default {
 </script>
 
 <template>  
-<div class="run-stats">
-  <h3>Step 3: View stats for run</h3>
-  <ag-grid-vue id="stats"
-  @grid-ready="onGridReadyStats"
-  style="width: 50vh; height: 40vh"
-  class="ag-theme-alpine"
-  :defaultColDef="defaultColDef"
-  :columnDefs="columnStats"
-  :rowData="statData">
-  </ag-grid-vue>
-</div>
-<div class="run-hyperparameters">
-  <h3>Step 4: View hyperparameters for run</h3>
-  <ag-grid-vue id="hyperparameters"
-  @grid-ready="onGridReadyHyperparameters"
-  style="width: 50vh; height: 40vh"
-  class="ag-theme-alpine"
-  :defaultColDef="defaultColDef"
-  :columnDefs="columnParams"
-  :rowData="rowData">
-</ag-grid-vue>
-</div>
+  <div class="run-stats">
+    <h3>Step 3: View stats for run</h3>
+    <ag-grid-vue id="stats"
+      @grid-ready="onGridReadyStats"
+      style="width: 50vh; height: 40vh"
+      class="ag-theme-alpine"
+      :defaultColDef="defaultColDef"
+      :columnDefs="columnStats"
+      :rowData="statData">
+    </ag-grid-vue>
+  </div>
 
+  <div class="run-hyperparameters">
+    <h3>Step 4: View hyperparameters for run</h3>
+    <ag-grid-vue id="hyperparameters"
+    @grid-ready="onGridReadyHyperparameters"
+    style="width: 50vh; height: 40vh"
+    class="ag-theme-alpine"
+    :defaultColDef="defaultColDef"
+    :columnDefs="columnParams"
+    :rowData="rowData">
+    </ag-grid-vue>
+  </div>
 </template>
 
 
-<style scss scoped>
+<style lang="scss" scoped>
 .ag-theme-alpine {
   --ag-secondary-border-color: none;
   --ag-font-size: 15px;
+
 }
 
 .run-stats {
   margin-top: 5%;
+  margin-bottom: 3%;
 }
 
 .run-stats, #stats {
@@ -159,13 +161,4 @@ export default {
   --ag-odd-row-background-color: rgb(0, 0, 0, 0.03);
   --ag-header-column-resize-handle-color: rgb(74, 74, 224);
 }
-
-
-.run-stats #stats {
-  margin-bottom: 3%;
-}
-
-.run-stats, .run-hyperparameters {
-}
-
 </style>

@@ -104,7 +104,7 @@ export default {
 </div>
 </template>
 
-<style scss scoped >
+<style lang="scss" scoped >
 
 .ag-theme-alpine {
   --ag-border-color:rgb(57, 59, 51);
@@ -117,6 +117,5 @@ export default {
   --ag-odd-row-background-color: rgb(0, 0, 0, 0.03);
   --ag-header-column-resize-handle-color: rgb(74, 74, 224);
 }
-
 </style>
 

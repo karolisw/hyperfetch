@@ -1,8 +1,8 @@
 <script>
 import AlgsOverview from '../components/AlgsOverview.vue';
 import RunsOverview from '../components/RunsOverview.vue';
-import { fromFullToShort } from '../utils/mapping.js'
 import Run from '../components/Run.vue'
+import { fromFullToShort } from '../utils/mapping.js'
 
 export default {
     name: "Environment",
@@ -16,20 +16,14 @@ export default {
             displayRuns: false,
             displayRun:false,
             selectedAlg: '',
-            componentKey: 0,
-            componentKey2: 0,
             value: 0,
-            interval: 0,
         }
     },
 
-    beforeUnmount () {
-    clearInterval(this.interval)
-    },
     methods: {
         async activateRunsOverview(alg) {
             this.value = 50
-            console.log("current alg: ", alg)
+            
             alg = fromFullToShort(alg)
             this.$store.commit('SET_CURRENT_ALG', alg)
 
@@ -39,9 +33,11 @@ export default {
                 alg: alg, 
                 limit: 10
             }) 
-            // componentKey mutated as a hack to re-render child component "RunsOverview"
-            this.componentKey += 1
-            this.componentKey2 += 1
+
+            
+            // Using prop to tunnel the change down to RunsOverview (child)
+            this.selectedAlg = alg
+
             this.displayRuns = true
             this.displayRun = false
         },
@@ -51,74 +47,67 @@ export default {
             console.log("current alg: ", this.$store.getters.GET_CURRENT_ALG)
 
             this.$store.commit('SET_CURRENT_RUN', run)
-            this.componentKey2 += 1
             this.displayRun = true
+        },
+        showSelection() {
+            this.displayRun = !this.displayRun
         }
     }
 }
 </script>
 
 <template>  
-<v-container class ="parent bg-lime-lighten-5 fluid" fluid >
-    <v-row align="start">
-        <v-spacer></v-spacer>
-        <v-col align-self="center" justify-self="center" flex-grow="0">
-            <v-progress-circular align-self="center" justify-self="center"
-            :rotate="360"
-            :size="80"
-            :width="10"
-            :model-value="value"
-            color="teal">
-                {{ value }}
-            </v-progress-circular>
-        </v-col>
-        <v-spacer></v-spacer>
-
-    </v-row>
-    <v-row>
-        <v-col align-self="start" cols="7"> 
-            <transition name="fade" mode="out-in">
-                <AlgsOverview class="algsView" :key="componentKey" @showRuns="activateRunsOverview"></AlgsOverview>
+<v-container class ="parent bg-indigo-accent-1"  fluid align="center">
+    <v-row align-self="center" justify-self="center">
+        <v-col justify="center">    
+            <transition name="fade" mode="in-out" >
+                <AlgsOverview v-show="!displayRun" class="algsView" justify="center" @showRuns="activateRunsOverview"></AlgsOverview>
             </transition>
-            <transition  name="fade" mode="out-in">
-                <RunsOverview class="runsView" v-if="displayRuns" :key="componentKey2" @selectedRun="activateRunView"></RunsOverview>
+            <transition name="fade" mode="in-out" >
+                <RunsOverview v-show="!displayRun" class="runsView" justify="center" v-bind:selectedAlg="selectedAlg" v-if="displayRuns" @selectedRun="activateRunView"></RunsOverview>
             </transition>
+            <v-btn class="returnBtn" v-show="displayRun" @click="showSelection" variant="outlined" transition="fade">
+                Return
+            </v-btn>
+            <transition name="fade" mode="in-out">
+                <Run v-if="displayRun"></Run>  
+            </transition>
+           
         </v-col>
-        <v-col cols="5">
-            <Run class="runView" v-if="displayRun" :key="componentKey2" ></Run>
-        </v-col>
+       
     </v-row>
 
 </v-container>
 
 </template>
 
-<style scss scoped>
+<style lang="scss" scoped>
 
 .parent {
     padding:0%;
 }
+.returnBtn {
+    margin-top: 5%;
+}
 
 .runsView {
     margin-left: 5%;
-    margin-top: 10%;
+    margin-top: 5%;
 }
 
 .algsView {
+    margin-top: 3%;
     margin-left: 5%;
-}
-
-.runView {
-    padding-left: 25px;
-}
-
-.fade-enter-to,
-.fade-leave.from {
-    opacity: 0;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.5s ease-out;
+  transition: opacity 0.3s ease-out;
 }
+
+.fade-enter-from, 
+.fade-leave-to {
+  opacity: 0
+}
+
 </style>
