@@ -2,7 +2,6 @@ from optuna_tuning.manager import Manager
 from codecarbon import EmissionsTracker
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-import config.core as core
 from utils.common import get_yaml_val
 
 storage = get_yaml_val("../config/db_config.yml", "url")
@@ -15,7 +14,7 @@ client = AsyncIOMotorClient(storage)
 # Tracks electricity usage in kWh (writes to emissions.csv)
 tracker = EmissionsTracker()
 
-async def tune(log_folder, config_path):
+async def tune(config_path):
     print("storage: ", storage)
     print("db: ", db)
     print("collection: ", collection)
@@ -43,4 +42,4 @@ async def tune(log_folder, config_path):
 
 if __name__ == "__main__":
     for i in range(10):
-        asyncio.run(tune(log_folder="logs", config_path="hp_config.yml"))
+        asyncio.run(tune(config_path="hp_config.yml"))

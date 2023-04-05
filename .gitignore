@@ -5,3 +5,6 @@ venv
 test_main.http
 main.py
 .env
+.codecarbon.config
+*.ini
+optuna_tuning/logs

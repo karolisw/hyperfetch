@@ -19,31 +19,6 @@ def check_threshold(study: optuna.study, trial, reward_threshold):
     return
 
 
-class EarlyStoppingCallback(StopTrainingOnRewardThreshold):
-    def __init__(
-            self,
-            reward_threshold: int,
-            trial: optuna.Trial,
-            verbose: int = 0,
-    ) -> None:
-        super().__init__(
-            reward_threshold=reward_threshold,
-            verbose=verbose
-        )
-        self.trial = trial
-
-    def _on_step(self) -> bool:
-        # continue_training = super()._on_step()
-        continue_training = self.trial.study.best_trial.value < self.reward_threshold  # true when best value smaller than reward threshold
-        # If the reward is good enough, the whole study stops
-        if not continue_training:
-            print("trying to stop trial")
-            self.trial.study.stop()
-            return False
-
-        return True
-
-
 class TrialEvalCallback(EvalCallback):
     """
     Callback used for evaluating and reporting a trial.
@@ -88,47 +63,4 @@ class TrialEvalCallback(EvalCallback):
             if self.trial.should_prune():
                 self.is_pruned = True
                 return False
-            '''
-            elif self.reward_threshold is not None:
-                # Early stop if reward threshold reached
-                print("best value: ", self.trial.study.best_value)
-                if self.trial.study.best_value > self.reward_threshold:
-                    self.trial.study.stop() #todo could work if i pass study instead of trial?
-                    return False
-            '''
-        return True
-
-
-class RawStatisticsCallback(BaseCallback):
-    """
-    Callback used for logging raw episode data (return and episode length).
-    """
-
-    def __init__(self, verbose=0):
-        super().__init__(verbose)
-        # Custom counter to reports stats
-        # (and avoid reporting multiple values for the same step)
-        self._timesteps_counter = 0
-        self._tensorboard_writer = None
-
-    def _init_callback(self) -> None:
-        assert self.logger is not None
-        # Retrieve tensorboard writer to not flood the logger output
-        for out_format in self.logger.output_formats:
-            if isinstance(out_format, TensorBoardOutputFormat):
-                self._tensorboard_writer = out_format
-        assert self._tensorboard_writer is not None, \
-            "You must activate tensorboard logging when using RawStatisticsCallback"
-
-    def _on_step(self) -> bool:
-        for info in self.locals["infos"]:
-            if "episode" in info:
-                logger_dict = {
-                    "raw/rollouts/episodic_return": info["episode"]["r"],
-                    "raw/rollouts/episodic_length": info["episode"]["l"],
-                }
-                exclude_dict = {key: None for key in logger_dict.keys()}
-                self._timesteps_counter += info["episode"]["l"]
-                self._tensorboard_writer.write(logger_dict, exclude_dict, self._timesteps_counter)
-
         return True

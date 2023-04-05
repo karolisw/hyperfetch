@@ -9,7 +9,6 @@ import optuna
 import pandas as pd
 import pymongo
 import torch
-from models.create_run import RunCreate
 from bson.json_util import dumps
 from gym import spaces
 from optuna.integration import SkoptSampler
@@ -194,11 +193,6 @@ class Manager:
         # Return the best trial
         return trial
 
-        # storage_name = "mongodb://localhost:27017/runs?authSource=admin"
-        # storage = "mongodb://localhost:27017"
-
-        # Save best trial to MongoDB
-        # self.save_trial(trial=trial, client=storage, db='runs', collection="run", study_name=study.study_name)
 
     def _create_logger(self, logger_name) -> None:
         """
@@ -344,15 +338,7 @@ class Manager:
             data.update({'n_jobs': 1})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
-        '''
-        if 'eval_freq' not in data.keys() or (
-                'eval_freq' in data.keys() and data['eval_freq'] != (data['n_timesteps'] / data['n_evaluations'])):
-            data.update({'eval_freq': int(data['n_timesteps'] / data['n_evaluations'])})
-            with open(path_to_config, "w") as writer:
-                yaml.safe_dump(data, writer)
-            logger.info('eval_freq should be n_timesteps/n_evaluations. Config value "eval_freq" set to %s.',
-                        data['eval_freq'])
-        '''
+
         if 'eval_freq' not in data.keys():
             logger.info('No eval_freq was specified for the eval callback. Config value "eval_freq" set to 10000.')
             data.update({'eval_freq': 10000})
@@ -546,10 +532,6 @@ class Manager:
         # self.sampler changes from string to sampler object
         if sampler == "random":
             return RandomSampler(seed=seed)
-        elif sampler == "grid":
-            alg = self.alg
-            # TODO GridSampler does not work because missing trial arg in parentheses () after [alg]
-            return GridSampler(search_space=ALG_HP_SAMPLER[alg](), seed=seed)
         elif sampler == "cmaes":
             return CmaEsSampler(n_startup_trials=n_startup_trials, seed=seed)
         elif sampler == "nsgaii":
@@ -615,16 +597,6 @@ class Manager:
         """
         # Do not log eval env (issue with writing the same file)
         log_dir = None if eval_env or no_log else self.log_folder
-        '''
-        # Special case for GoalEnvs: log success rate too
-        if (
-                "Neck" in self.env
-                or self.is_robotics_env(self.env_name.gym_id)
-                or "parking-v0" in self.env_name.gym_id
-                and len(self.monitor_kwargs) == 0  # do not overwrite custom kwargs
-        ):
-            self.monitor_kwargs = dict(info_keywords=("is_success",))
-        '''
 
         spec = gym.spec(self.env)
 
@@ -710,43 +682,6 @@ class Manager:
         print("Posted!")
 
 
-# TODO remove at some point
-def load_trial(client, db, collection, study_name, limit=10, direction=1):
-    """
-    :param client: URL (ex: mongodb://localhost:27017)
-    :param db: name of the db to load trial(s) from
-    :param collection: name of the collection to load trial(s) from
-    :param study_name: env_alg (ex: LunarLander-v2_ppo)
-    :param limit: limits the number of documents in the result set.
-    :param direction: 1=sort ascending, while -1=sort descending
-    :return:
-    """
-
-    # Creating connection
-    my_client = motor.AsyncIOMotorClient(client)
-    # my_client = pymongo.MongoClient(client)
-    my_db = my_client[db]
-
-    # "runs.run"
-    my_collection = my_db[collection]
-
-    if direction == 1:
-        direction = pymongo.ASCENDING
-    else:
-        direction = pymongo.DESCENDING
-
-    # The result set (called cursor in MongoDB)
-    cursor = my_collection.find({'name': study_name}).limit(limit).sort("reward", direction)
-
-    # Converting to json in order to send it to frontend
-    cursor_list = list(cursor)
-    json_data = dumps(cursor_list)
-    print(json_data)
-
-
 if __name__ == '__main__':
     manager = Manager(config_path="hp_config.yml")
     manager.run()
-
-    # storage_name = "mongodb://localhost:27017"
-    # load_trial(client=storage_name, db='runs', collection='run', study_name="LunarLander-v2_ppo")
