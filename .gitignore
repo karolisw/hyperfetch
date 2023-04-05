@@ -8,3 +8,4 @@ main.py
 .codecarbon.config
 *.ini
 optuna_tuning/logs
+optuna_tuning/emissions.csv
