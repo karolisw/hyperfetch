@@ -1,0 +1,6 @@
+username: muUserAdmin
+password: SkoleBole69
+url: mongodb://localhost:27017/runs?authSource=admin
+storage: mongodb://localhost:27017
+db: runs
+collection: run
