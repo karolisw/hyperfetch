@@ -1,8 +1,5 @@
 from fastapi import FastAPI
-from utils.common import *
-from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 from routes.run_route import router
 from config.core import ALLOWED_HOSTS
 from utils.db_utils import connect_to_motor, close_motor_connection
@@ -10,12 +7,13 @@ from settings import api_settings as settings
 from middleware import request_handler
 
 #config = dotenv_values(".env")
-app = FastAPI(title=settings.title)
+app = FastAPI()
 #storage = get_yaml_val("config/db_config.yml", "storage")
 
 
 if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS = ["*"]  # type: ignore
+    ALLOWED_HOSTS = ["http://localhost:5173"]  # type: ignore
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_HOSTS,
@@ -24,12 +22,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+print("ALLOWED HOSTS: ", ALLOWED_HOSTS)
 app.add_event_handler("startup", connect_to_motor)
 app.add_event_handler("shutdown", close_motor_connection)
 
-app.add_exception_handler(HTTPException, http_error_handler)
-app.add_exception_handler(HTTP_422_UNPROCESSABLE_ENTITY, http_422_error_handler)
+#app.add_exception_handler(HTTPException, http_error_handler)
+#app.add_exception_handler(HTTP_422_UNPROCESSABLE_ENTITY, http_422_error_handler)
 
 '''
 @app.on_event("startup")
