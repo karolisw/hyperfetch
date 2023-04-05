@@ -683,5 +683,5 @@ class Manager:
 
 
 if __name__ == '__main__':
-    manager = Manager(config_path="hp_config.yml")
+    manager = Manager(config_path="../config/tuning_parameters.yml")
     manager.run()

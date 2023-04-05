@@ -4,7 +4,7 @@ from starlette.status import HTTP_201_CREATED
 
 from config.mongodb import get_database
 
-from crud.run_functions import *
+from crud.run_crud import *
 
 # prefix: start of every decorator provided by fastapi in this particular page
 # tags: the functionality of this category

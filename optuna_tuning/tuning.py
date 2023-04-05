@@ -4,9 +4,9 @@ import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.common import get_yaml_val
 
-storage = get_yaml_val("../config/db_config.yml", "url")
-db = get_yaml_val("../config/db_config.yml", "db")
-collection = get_yaml_val("../config/db_config.yml", "collection")
+storage = get_yaml_val("../config/no_auth_connection.yml", "url")
+db = get_yaml_val("../config/no_auth_connection.yml", "db")
+collection = get_yaml_val("../config/no_auth_connection.yml", "collection")
 
 client = AsyncIOMotorClient(storage)
 
@@ -42,4 +42,4 @@ async def tune(config_path):
 
 if __name__ == "__main__":
     for i in range(10):
-        asyncio.run(tune(config_path="hp_config.yml"))
+        asyncio.run(tune(config_path="../config/tuning_parameters.yml"))
