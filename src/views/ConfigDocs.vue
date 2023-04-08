@@ -563,6 +563,7 @@ export default {
         }
     }
     .has-table {
+            margin-top:100px !important;
             margin-left:25vh !important;
             border-style: outset;
             border-color: rgb(14, 58, 202);

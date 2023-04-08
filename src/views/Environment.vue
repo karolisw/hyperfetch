@@ -70,7 +70,7 @@ export default {
                 Return
             </v-btn>
             <transition name="fade" mode="in-out">
-                <Run v-if="displayRun"></Run>  
+                <Run v-if="displayRun" justify="center"></Run>  
             </transition>
            
         </v-col>
@@ -102,7 +102,7 @@ export default {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease-out;
+  transition: opacity 0.8s ease-out;
 }
 
 .fade-enter-from, 
