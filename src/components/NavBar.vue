@@ -7,6 +7,8 @@
             <ul v-show="!mobile" class="navigation">
                 <li><router-link class="link" :to="{name: 'Home'}">Home</router-link></li>
                 <li><router-link class="link" :to="{name: 'About'}">About</router-link></li>
+                <li><router-link class="link" :to="{name: 'ConfigDocs'}">Config</router-link></li>
+                <li><router-link class="link" :to="{name: 'UsingPip'}">Using pip</router-link></li>
             </ul>
             <div class="icon">
                 <i @click="toggleMobileNav" v-show="mobile" class="far fa-bars" :class="{'icon-active' : mobileNav}"></i>
@@ -15,6 +17,8 @@
                 <ul v-show="mobileNav" class="dropdown-nav">
                     <li><router-link class="link" :to="{name: 'Home'}">Home</router-link></li>
                     <li><router-link class="link" :to="{name: 'About'}">About</router-link></li>
+                    <li><router-link class="link" :to="{name: 'ConfigDocs'}">Config</router-link></li>
+                    <li><router-link class="link" :to="{name: 'UsingPip'}">Using pip</router-link></li>
                 </ul>
             </transition>
         </nav>

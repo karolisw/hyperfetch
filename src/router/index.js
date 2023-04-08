@@ -2,6 +2,8 @@ import {createRouter, createWebHistory} from 'vue-router'
 import LandingPage from '../views/LandingPage.vue'
 import Environment from '../views/Environment.vue'
 import About from '../views/About.vue'
+import UsingPip from '../views/UsingPip.vue'
+import ConfigDocs from '../views/ConfigDocs.vue'
 
 /** 
 path: the URL path where this route can be found.
@@ -17,7 +19,9 @@ const router = createRouter({
   routes: [
       {path: '/', name: 'Home', component: LandingPage},
       {path: '/env', name: 'Environment', component: Environment},
-      {path: '/about', name: 'About', component: About}
+      {path: '/about', name: 'About', component: About},
+      {path: '/usingPip', name: 'UsingPip', component: UsingPip},
+      {path: '/configDocs', name: 'ConfigDocs', component: ConfigDocs}
   ]
 })
 

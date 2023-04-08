@@ -13,8 +13,6 @@ export default {
   }, 
 
   created() { 
-    // Only one row can be selected at a time from grid
-    this.rowSelection = 'single';
     this.currentRun = this.$store.getters.GET_CURRENT_RUN
     this.currentAlg = this.$store.getters.GET_CURRENT_ALG
     this.currentEnv = this.$store.getters.GET_CURRENT_ENV
@@ -58,7 +56,6 @@ export default {
       rowData: [],
       statData: [],
       stats: [],
-      rowSelection: null,
       currentEnv: "",
       currentAlg: "",
       errorLabel: "",
@@ -94,7 +91,7 @@ export default {
       this.statData.push({ param: "CO2 emissions", value: run.CO2_emissions })
       this.statData.push({ param: "Energy consumed", value: run.energy_consumed })
       this.statData.push({ param: "Total time", value: run.total_time })
-      this.statData.push({ param: "Reward", value: run.reward }) //TODO place on its own!
+      this.statData.push({ param: "Reward", value: run.reward }) 
       this.statData.push({ param: "CPU model", value: run.cpu_model })
       this.statData.push({ param: "GPU model", value: run.gpu_model })
 
@@ -105,28 +102,30 @@ export default {
 </script>
 
 <template>  
-  <div class="run-stats">
-    <h3>Step 3: View stats for run</h3>
-    <ag-grid-vue id="stats"
-      @grid-ready="onGridReadyStats"
+  <div>
+    <div class="run-stats">
+      <h3>Step 3: View stats for run</h3>
+      <ag-grid-vue id="stats"
+        @grid-ready="onGridReadyStats"
+        style="width: 50vh; height: 40vh"
+        class="ag-theme-alpine"
+        :defaultColDef="defaultColDef"
+        :columnDefs="columnStats"
+        :rowData="statData">
+      </ag-grid-vue>
+    </div>
+
+    <div class="run-hyperparameters">
+      <h3>Step 4: View hyperparameters for run</h3>
+      <ag-grid-vue id="hyperparameters"
+      @grid-ready="onGridReadyHyperparameters"
       style="width: 50vh; height: 40vh"
       class="ag-theme-alpine"
       :defaultColDef="defaultColDef"
-      :columnDefs="columnStats"
-      :rowData="statData">
-    </ag-grid-vue>
-  </div>
-
-  <div class="run-hyperparameters">
-    <h3>Step 4: View hyperparameters for run</h3>
-    <ag-grid-vue id="hyperparameters"
-    @grid-ready="onGridReadyHyperparameters"
-    style="width: 50vh; height: 40vh"
-    class="ag-theme-alpine"
-    :defaultColDef="defaultColDef"
-    :columnDefs="columnParams"
-    :rowData="rowData">
-    </ag-grid-vue>
+      :columnDefs="columnParams"
+      :rowData="rowData">
+      </ag-grid-vue>
+    </div>
   </div>
 </template>
 
