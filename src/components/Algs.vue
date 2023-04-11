@@ -1,5 +1,4 @@
 <script>
-
 import { AgGridVue } from "ag-grid-vue3";
 import "ag-grid-community/styles//ag-grid.css";
 import "ag-grid-community/styles//ag-theme-alpine.css";
@@ -16,13 +15,13 @@ export default {
   },
 
   created() {
-    // Only one row can be selected at a time from grid
+    // Only one row can be selected at a time 
     this.rowSelection = 'single';
 
     // Get currently selected env
     this.currentEnv = this.$store.GET_CURRENT_ENV,
 
-    // Get algs
+    // Get algs for selected env
     this.algorithmList = this.$store.getters.GET_ALGS
 
     // Define grid headers
@@ -32,6 +31,7 @@ export default {
       { headerName: "Best reward", field: "reward",  maxWidth: 150 },  
     ]
 
+    // Define grid structure
     this.defaultColDef = {
         editable: false,
         sortable: true,
@@ -53,34 +53,39 @@ export default {
         rowSelection: null,
         currentEnv: "",
         errorLabel: "",
-        showRuns: false // TODO should and can probably be removed 
     };
   },
 
   methods: {
+
+    /**
+     * Event handler for user-click on single row in grid
+     */
     async onSelectAlgorithm() { 
       const selectedRows = this.gridApi.getSelectedRows() 
 
-      // document.querySelector('#selectedRows1').innerHTML = selectedRows.length === 1 ? selectedRows[0].full : ''
-
-      // Telling the parent of this component that an algorithm has been selected and that runs can be shown
-      this.showRuns = true  
-
-      // Emit the selected algorithm
+      // Emit the selected algorithm to parent (Overview.vue)
       this.$emit("showRuns", selectedRows[0].full)
     }, 
 
+    
+    /**
+     * Grid object is mounted to the DOM and rows are loaded into grid here
+     * @param {*} params the current grid 
+     */
     onGridReady(params) {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
 
       const updateData = (data) => params.api.setRowData(data);
 
-      // Retrieve the necessary row data from algs
+      // Reformate the data from algortithmList
       for (let i = 0; i < this.algorithmList.length; i++) {
         const element = this.algorithmList[i]
         this.rowData.push({ full: fromShortToFull(element.alg), reward: element.reward })
       }
+
+      // Push data into grid
       updateData(this.rowData)
     },
   }

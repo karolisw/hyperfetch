@@ -17,22 +17,21 @@ export default {
     this.currentAlg = this.$store.getters.GET_CURRENT_ALG
     this.currentEnv = this.$store.getters.GET_CURRENT_ENV
 
-    // Define grid headers
+    // Define grid headers for hyper-parameter grid
     this.columnParams= [
-      { headerName: "Param", field: "param", minWidth: 100},
+      { headerName: "Param", field: "param", minWidth: 100 },
       { headerName: "Value", field: "value",  minWidth: 150 },
     ]
-    // For containing fields not related to hyperparameters
+
+    // Define grid headers for stats grid   
     this.columnStats = [
-    { headerName: "", field: "",     
-      cellRendererSelector: (params) => {
-        const envDetails = { component: 'RunCellRenderer' };
-        if (params.data.param === 'CO2 emissions' || params.data.param === 'Energy consumed' || params.data.param === 'Total time') return envDetails;
-        else return undefined;
-      }, minWidth:50, maxWidth: 100 },
-      //{ headerName: "", field: "", cellRenderer: "RunCellRenderer", minWidth:50, maxWidth: 100},
+      { headerName: "", field: "", cellRendererSelector: (params) => {
+          const envDetails = { component: 'RunCellRenderer' };
+          if (params.data.param === 'CO2 emissions' || params.data.param === 'Energy consumed' || params.data.param === 'Total time') return envDetails;
+          else return undefined;
+        }, minWidth:50, maxWidth: 100 },
       { headerName: "Stats", field: "param", minWidth: 100},
-      { headerName: "", field: "value",  minWidth: 150 },
+      { headerName: "", field: "value",  minWidth: 150 }, 
     ]
 
     this.defaultColDef = {
@@ -64,13 +63,17 @@ export default {
 
   methods: {
 
-    // Retrieve the necessary data from currentRun and convert to row
+    /**
+     * Grid object is mounted to the DOM and hyper-parameters are loaded into first grid here
+     * @param {*} params the current grid 
+     */
     onGridReadyHyperparameters(params) {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
 
       const updateData = (data) => params.api.setRowData(data);
 
+      // Hyper-parameters are found in the trial parameter of 'currentRun'
       let trial = this.currentRun.trial
       for (const [key, val] of Object.entries(trial)) {
         this.rowData.push({ param: key, value: val })
@@ -79,6 +82,11 @@ export default {
       updateData(this.rowData)
     },
 
+    
+    /**
+     * Grid object is mounted to the DOM and stats are loaded into second grid here
+     * @param {*} params the current grid 
+     */
     onGridReadyStats(params) {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi; 
@@ -86,7 +94,7 @@ export default {
       const updateData = (data) => {
         params.api.setRowData(data)
       };
-
+      
       let run = this.currentRun
       this.statData.push({ param: "CO2 emissions", value: run.CO2_emissions })
       this.statData.push({ param: "Energy consumed", value: run.energy_consumed })

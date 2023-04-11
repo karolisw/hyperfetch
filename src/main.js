@@ -1,10 +1,9 @@
 import { createApp } from 'vue/dist/vue.esm-bundler';
 import App from './App.vue';
 import router from './router/index.js';
-import './style.css';
 import store from './store/index.js'    
 
-// Vuetify
+// Vuetify modules
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
@@ -17,7 +16,6 @@ const vuetify = createVuetify({
 
 
 createApp(App)
-//.use(Vuex)
 .use(store)
 .use(router)
 .use(vuetify)

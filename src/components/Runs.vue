@@ -6,30 +6,31 @@ import "ag-grid-community/styles//ag-theme-alpine.css";
 
 export default {
   name: "Runs",
-  props: ['selectedAlg'], // Environment receives from AlgOverview and sends it here
+  props: ["selectedAlg"], 
   emits: ["selectedRun"],
   components: {
     AgGridVue
   }, 
 
-  // Watches for changes in value for selectedAlg prop
   watch: {
-    selectedAlg: function(newVal, oldVal) { 
+    /**
+     * Watches for changes in value for selectedAlg prop
+     * Value is handled in parent, but watch is needed still
+     * for this class (child) to be made aware of the change
+     */
+    selectedAlg: function() { 
 
-      // Fetch new runs
+      // Fetch new runs 
       this.runs = this.$store.getters.GET_RUNS
 
       // Refresh the grid 
       this.updateGrid()
-      console.log("nr runs in db: ", this.runs.length)
-      console.log("exiting method")
     }
   },
 
   beforeMount() {
     this.gridOptions = {};
 
-    // Define grid headers
     this.columnDefs= [
         { headerName: "ID", field: "id"},
         { headerName: "Reward", field: "reward"},
@@ -48,15 +49,10 @@ export default {
   },
 
   created() { 
-
-    // Only one row can be selected at a time from grid
     this.rowSelection = 'single';
     this.currentEnv = this.$store.getters.GET_CURRENT_ENV
     this.runs = this.$store.getters.GET_RUNS  
-
-
     this.rowData = this.immutableStore
-
   },
 
   data() {
@@ -73,7 +69,6 @@ export default {
       rowSelection: null,
       currentEnv: "",
       currentAlg: "",
-      errorLabel: "",
     };
   },
 
@@ -81,22 +76,25 @@ export default {
     async onSelectRun() { 
         const selectedRows = this.gridApi.getSelectedRows() 
         
-        //document.querySelector('#selectedRows2').innerHTML = selectedRows.length === 1 ? selectedRows[0].id : ''
-
         // Fetch the run
         await this.$store.dispatch('getRun', {id: selectedRows[0].id})
 
-        //document.getElementById("selectedRows2").style.visibility = "hidden"; 
-
-        console.log("CURRENT RUN: ", this.$store.getters.GET_CURRENT_RUN)
         // Telling the parent of this component that an algorithm has been selected and that runs can be shown
         this.$emit("selectedRun", this.$store.getters.GET_CURRENT_RUN) 
     }, 
 
+    /**
+     * Updates grid upon prop-receival from parent. 
+     * Updates when new algorithm is selected (Algs.vue)
+     */
     updateGrid() {
-      // Mutating existing rowdata
+      // Removing current row data
       this.gridApi.setRowData([])
+
+      // RowData is immutable, thus we must create a new list
       let newRowData = []
+
+      // Format row data from newly loaded runs
       for (let i = 0; i < this.runs.length; i++) {
         const element = this.runs[i]
         newRowData.push({ 
@@ -106,27 +104,26 @@ export default {
           co2: element.CO2_emissions
         })
       }
-    
 
-      console.log("newRowData.size : ", newRowData.length)
+      // Mutating mutable list "immutableStore" 
       this.immutableStore = newRowData
       this.gridApi.setRowData(this.immutableStore)
-
-      //this.gridApi.setRowData(newRowData);
     },
 
+    /**
+     * Grid object is mounted to the DOM and rows are loaded into grid here
+     * @param {*} params the current grid 
+     */
     onGridReady(params) {
-      console.log("runs length: ", this.runs.length)
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
 
-      //this.gridApi.setRowData([])
       let newRowData = []
       params.api.setRowData(newRowData)
 
       const updateData = (data) => params.api.setRowData(data);
       
-      // Retrieve the necessary data from runs and convert each run to a row
+      // Format data
       for (let i = 0; i < this.runs.length; i++) {
         const element = this.runs[i]
         newRowData.push({ 
@@ -136,9 +133,9 @@ export default {
           co2: element.CO2_emissions
         })
       }
-      this.immutableStore = newRowData
-      console.log("immutable store: ", this.immutableStore)      
 
+      // Add data to grid
+      this.immutableStore = newRowData
       updateData(this.immutableStore)
     },
   }

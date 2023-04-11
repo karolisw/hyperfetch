@@ -88,7 +88,6 @@ export default createStore({
     },
 
     async getAlgorithmsForEnv({commit, state}, selected_env) {
-        console.log("selected env looks like: ", selected_env.selected_env)
         let response
         try {
             response = await service.fetchAlgs(selected_env.selected_env)
@@ -101,8 +100,9 @@ export default createStore({
         }
     },
 
-       /**
+    /**
      * Fetch single run by id
+     * 
      * @param {*} id run ID
      */
        async getRun({commit, state}, param) {
@@ -127,6 +127,7 @@ export default createStore({
 
     /**
      * Fetches the best runs for an algorithm (within an environment)
+     * 
      * @param {*} env the env we are searching within
      * @param {*} alg the alg within the env
      * @param {*} limit the amount of runs we wish returned 
@@ -141,8 +142,6 @@ export default createStore({
                     element.energy_consumed = parseFloat(element.energy_consumed).toFixed(4)
                     element.CO2_emissions = parseFloat(element.CO2_emissions).toFixed(5)
                 });
-                //console.log("response: ", response)
-                //response.data.reward = parseFloat(response.data.reward).toFixed(6)
                 commit('SET_RUNS', response.data)
             })
         } catch (error) {
@@ -150,6 +149,4 @@ export default createStore({
         }
     }
   },
-
-  modules: {}
 })
