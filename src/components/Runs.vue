@@ -5,7 +5,7 @@ import "ag-grid-community/styles//ag-grid.css";
 import "ag-grid-community/styles//ag-theme-alpine.css";
 
 export default {
-  name: "RunsOverview",
+  name: "Runs",
   props: ['selectedAlg'], // Environment receives from AlgOverview and sends it here
   emits: ["selectedRun"],
   components: {
