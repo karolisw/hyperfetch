@@ -4,7 +4,6 @@
             <v-col cols="12">
                 <h2>Hi! This is HyperFetch </h2>
                 <h3>Smart and environmentally concious</h3>
-
             </v-col>
         </v-row>
 
@@ -48,9 +47,16 @@
                 </div>
                 <div class="text box-right">
                     <h2>HyperFetch aims to reduce collective emissions</h2>
-                    <p> Training machine learning models in themselves is very energy-intensive. When repetitive training runs are demanded due to the tuning of hyperparameters in addition to that, the collective CO2-emissions are astounding.
+                    <p>Machine learning models are growing increasingly powerful in their abilities, whether that might be in processing natural language, tackling the intricacies of computer vision, or any other number of exciting applications that are emerging.</p>
+                    <p>Training these huge models, howerver, comes at a great cost to the environment. When repetitive training runs are demanded due to the tuning of hyperparameters in addition to that, the collective CO2-emissions are astounding.
+                    <p>Hardware and training time has everything to say when calculating CO2 emissions. A research paper named 
+                        <a class="small" href="https://arxiv.org/pdf/1906.02243.pdf">Energy and Policy Considerations for Deep Learning in NLP</a>
+                        states that an NLP model using Neural Architecture Search can emit 626,000 pounds of CO₂ or more. </p>
                         <br><br>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Obcaecati iste corporis adipisci id! Deserunt voluptates dignissimos ipsum, maxime exercitationem dolorem blanditiis atque corrupti nihil rem eos, aperiam a adipisci tempore sit eligendi provident perferendis sapiente! Ipsam quam repellat delectus fuga, doloribus libero eum, praesentium laborum voluptatem veritatis cupiditate, quod veniam in vitae eveniet omnis id itaque quasi beatae alias distinctio! Rerum libero placeat reiciendis pariatur dolor eum quisquam quos in nisi dolorum tempore, minima error aut repellendus cum, maxime accusamus natus ex amet deleniti distinctio exercitationem. Officiis eum tempore corrupti beatae ipsa. Eligendi dicta officia natus sequi nesciunt enim earum?
+                        When calculating the CO2 emissions for a full day of training using an RTX 3080 (
+                            <a class="small" href="https://mlco2.github.io/impact/#compute">mlco2</a>
+                        ) the total emissions are only 7.5 pounds. 
+                        However, this application proposes the idea that training only has to happen for new problems. When sharing optimized hyperparameters for an environment such that others can reuse them, aquiring good hyperparameters much more environmentally friendly. 
                     </p>
                     <a target="_blank" href="https://www.nature.com/articles/s42256-022-00529-w">nature.com<span class="link-arrow">⟶</span></a>
                 </div>
@@ -66,7 +72,15 @@
                     <h2>HyperFetch terminates a big hurdle within RL</h2>
                     <p> Reinforcement learning (RL) with its many components and vast amount of blackboxing can be very hard to understand for those just entering the field. 
                     <br><br>
-                    Considering the combinatory problem that is tuning the hyperparameters of a RL model, the field is very advanced without help in tuning them.</p>
+                    Considering the combinatory problem that is tuning the hyperparameters of a RL model, 
+                    the field is very advanced. For those with little to no experience with RL, tuning is an impossible landscape
+                    with a numerous amount of pitfall and no with no obvious source of guidance regarding which values to give the hyperparameters. 
+                    HyperFetch aims to make the introduction to Reinforcement Learning softer, as beginners will have a two-in-one service. On one side, 
+                    HyperFetch will help in tuning hyperparameters for the practicioner. In addition, HyperFetch will supply readily availabe hyper-parameters
+                    provided by other pracitcioners in this free and easy to use website. 
+                    <br><br>
+                    Ready, Fetch, Go!
+                </p>
                 </div>
             </v-col>
         </v-row>
@@ -80,10 +94,22 @@
                     <h2>For researchers: HyperFetch aims to increase reproductability</h2>
                     <p> Without hyperparameters it can be next to impossible to reproduce other projects' results -especially when those projects are performed with great amounts of processing power. 
                         <br><br>
-                        Vi har vært med å utvikle hele den tekniske platformen til FeltGIS, og vi har utforsket mange spennende idéer og teknologier på vei mot den endelige tekniske løsningen.
-                        AI is suffering a replication crisis where "...the line between real breakthrough and product showcase can be fuzzy."
+                        Being able to reproduce reinforcement learning (RL) tasks is important to ensure that the research on 
+                        the field is reproductuctible such that algorithms/solutions can be compared easily and fairly with minimal bias.
+                        As reinforcement learning (RL) is able to solve increasingly complex tasks and problems, however, reproducing
+                        results also gets more complex due to the variance of the algorithms, the stochasticity of the environments, and
+                        the many hyper-parameters. In addititon, these hyper-parameters are not always published alongside its research (or even at all).
+                        Read more in 
+                        <a class="small" href="https://arxiv.org/abs/1909.03772">this research paper</a>.
+                        To join in on solving the replication crisis in AI, HyperFetch aims to aid in persisting hyper-parameters. For now, hyper-parameters
+                        are not linked to specific projects, but are ranked in order of best to least reward. 
+                        We aim to make the line between real breakthrough and product showcase less fuzzy. 
+                        <br><br>
+                        Read more about the replication crisis at:
+                        <br>
+                        <a target="_blank" href="https://www.technologyreview.com/2020/11/12/1011944/artificial-intelligence-replication-crisis-science-big-tech-google-deepmind-facebook-openai/">technologyreview.com <span class="link-arrow">⟶</span></a>
+
                     </p>
-                    <a target="_blank" href="https://www.technologyreview.com/2020/11/12/1011944/artificial-intelligence-replication-crisis-science-big-tech-google-deepmind-facebook-openai/">technologyreview.com <span class="link-arrow">⟶</span></a>
                 </div>
             </v-col>
         </v-row>
@@ -127,7 +153,7 @@
                 <v-btn @click="toHome" variant="outlined" color="white" elevation="20">Fetch hyperparameters</v-btn>
             </v-col>
             <v-col>
-                <v-btn @click="toUsingPip" variant="outlined" color="white" elevation="20">Create hyperparameters</v-btn>
+                <v-btn @click="toGetStarted" variant="outlined" color="white" elevation="20">Create hyperparameters</v-btn>
             </v-col>
         </v-row>
 
@@ -136,16 +162,16 @@
 
 <script>
 import LandingPage from './LandingPage.vue'
-import UsingPip from './UsingPip.vue'
+import GetStarted from './GetStarted.vue'
 
 export default {
     name: "About",
 
     methods: {
-        toUsingPip() {
+        toGetStarted() {
             this.$router.push({
-                  name: 'UsingPip',
-                  component: UsingPip,
+                  name: 'GetStarted',
+                  component: GetStarted,
         })
         },
         toHome() {
@@ -170,7 +196,7 @@ export default {
             font-size: 48px;
         }
         
-        font-weight: 900;
+        font-weight: 600;
         font-size: 36px;
         line-height: 109.12%;
     }
@@ -180,7 +206,7 @@ export default {
             font-size: 28px;
         }
     
-        font-weight: 900;
+        font-weight: 600;
         font-size: 26px;
         line-height: 109.12%;
     }
@@ -228,7 +254,7 @@ export default {
 
             h4 {
                 font-style: normal;
-                font-weight: 800;
+                font-weight: 600;
                 font-size: 24px;
                 line-height: 26px;
             }
@@ -241,7 +267,7 @@ export default {
             a {
                 text-decoration: none;
                 color: #f0885d;
-                font-weight: 900;
+                font-weight: 600;
                 font-size: 18px;
                 line-height: 30px;
             }
@@ -274,6 +300,17 @@ export default {
                 color: rgb(71, 69, 190);
             }
         }
+
+        .small {
+                font-weight: 400 !important;
+                line-height: 20px !important;
+                font-size: 16px !important;
+                text-decoration: none;
+                }
+                a.small:hover {
+                color: #c56339;
+                font-weight: 700;
+            }
         .case {
             max-width: 1240px;
             margin: 0 auto;
@@ -391,6 +428,11 @@ body a {
     font-size: 22px;
     line-height: 30px;
 
+    a:hover {
+            color: #c56339;
+            font-weight: 700;
+            }
+
     .link-arrow {
         font-size: 22px;
         line-height: 24px;
@@ -415,5 +457,4 @@ body a {
         margin: auto;
     }
 }
-
 </style>
