@@ -491,20 +491,17 @@ export default {
     }
     .text {
         h1 {
-            font-style: normal;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 30px;
             line-height: 30px;
         }
         h2 {
-            font-style: normal;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 24px;
             line-height: 26px;
         }
         h3 {
-            font-style: normal;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 20px;
             line-height: 26px;
         }
@@ -519,17 +516,21 @@ export default {
         a {
             text-decoration: none;
             color: #f0885d;
-            font-weight: 900;
+            font-weight: 700;
             font-size: 18px;
             line-height: 30px;
         }
+
+        a:hover {
+            color: #c56339;
+            font-weight: 700;
+        }
         
-        code{
+        code {
             padding: 2px 5px;
             background: #fff;
             border: 1px solid #e1e4e5;
             font-size: 75%;
-            font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,Courier,monospace;
             color: #e74c3c;
             overflow-x: auto;
             .literal {
