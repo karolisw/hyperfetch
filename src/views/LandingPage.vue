@@ -1,5 +1,5 @@
 <script>
-import Environment from "./Environment.vue";
+import Overview from "./Overview.vue";
 
 export default {
   name: "LandingPage",
@@ -26,8 +26,8 @@ export default {
       
       if (this.$store.getters.GET_ALGS.length > 0) {
         this.$router.push({
-                  name: 'Environment',
-                  component: Environment,
+                  name: 'Overview',
+                  component: Overview,
         })
       }
       else {
