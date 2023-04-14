@@ -20,9 +20,13 @@ class RunFields:
     trial = Field(
         description="Best performing hyperparameters for the run"
     )
-    name = Field(
-        description="String concatation of environment name and algorithm name",
-        example="LunarLander-v2_ppo"
+    project_name = Field(
+        description="Name of the project that the hyperparameters belong to",
+        example="HyperFetch"
+    )
+    git_link = Field(
+        description="The link to the repository of the project the hyperparameters belong to",
+        example="https://github.com/karolisw/hyperFetch"
     )
     energy_consumed = Field(
         description="The energy (kWh) consumed by the device that ran the run"

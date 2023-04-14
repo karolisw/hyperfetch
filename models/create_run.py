@@ -11,7 +11,8 @@ __all__ = ("RunCreate",)
 class RunCreate(BaseModel):
     """Body of Run POST request"""
     trial: Dict[str, Union[str, float]] = RunFields.trial
-    name: str = RunFields.name
+    project_name: str = RunFields.project_name
+    git_link: str = RunFields.git_link
     energy_consumed: float = RunFields.energy_consumed
     cpu_model: str = RunFields.cpu_model
     gpu_model: str = RunFields.gpu_model
