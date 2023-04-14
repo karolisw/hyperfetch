@@ -4,7 +4,6 @@ from routes.run_route import router
 from config.auth_connection import ALLOWED_HOSTS
 from utils.db_utils import connect_to_motor, close_motor_connection
 
-
 app = FastAPI()
 
 if not ALLOWED_HOSTS:

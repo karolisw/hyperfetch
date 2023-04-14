@@ -1,11 +1,12 @@
 .idea
 *.idea
 venv
+.mypy_cache
+tests/.pytest_cache
+hyper_fetch/logs
 *.xml
-test_main.http
 main.py
 .env
 .codecarbon.config
 *.ini
-optuna_tuning/logs
-optuna_tuning/emissions.csv
+hyper_fetch/emissions.csv

@@ -2,14 +2,14 @@
 Methods that interact with the database
 '''
 
-from optuna_tuning.alg_samplers import SUPPORTED_ALGORITHMS
+from hyper_fetch.alg_samplers import SUPPORTED_ALGORITHMS
 from models.create_run import RunCreate
 from typing import List
 from config.mongodb import AsyncIOMotorClient
 from config.auth_connection import database_name, run_collection_name
 from models.receive_run import *
 from utils.exceptions import *
-from utils.common import get_time, get_uuid
+from utils.db_utils import get_time, get_uuid
 
 
 async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:

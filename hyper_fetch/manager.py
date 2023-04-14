@@ -3,29 +3,31 @@ import logging
 import logging.config
 from datetime import datetime
 from pprint import pprint
+from time import time
+
 import gym
 import motor.motor_asyncio as motor
 import optuna
 import pandas as pd
-import pymongo
 import torch
-from bson.json_util import dumps
 from gym import spaces
 from optuna.integration import SkoptSampler
 from optuna.pruners import SuccessiveHalvingPruner, MedianPruner, NopPruner, HyperbandPruner, PercentilePruner, \
     PatientPruner, ThresholdPruner
-from optuna.samplers import RandomSampler, GridSampler, TPESampler, CmaEsSampler, NSGAIISampler
+from optuna.samplers import RandomSampler, TPESampler, CmaEsSampler, NSGAIISampler
 from optuna.trial import FrozenTrial
 from stable_baselines3 import PPO, DQN, A2C, TD3, SAC
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
 from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from utils.common import *
-from optuna_tuning.alg_samplers import ALG_HP_SAMPLER
-from optuna_tuning.callbacks import TrialEvalCallback, ThresholdExceeded
+from hyper_fetch.util import *
+from hyper_fetch.alg_samplers import ALG_HP_SAMPLER
+from hyper_fetch.callbacks import TrialEvalCallback, ThresholdExceeded
+from utils.db_utils import get_uuid
 
-def _select_model(alg, **kwargs) :
+
+def _select_model(alg, **kwargs):
     if alg == "ppo":
         return PPO(**kwargs)
     elif alg == "dqn":
@@ -193,7 +195,6 @@ class Manager:
         # Return the best trial
         return trial
 
-
     def _create_logger(self, logger_name) -> None:
         """
         :param logger_name: name of the logger
@@ -299,7 +300,7 @@ class Manager:
 
         if 'pruner' not in data.keys():
             logger.info('No pruner was specified. Config value "tuner" set to "hyperband" (HyperbandTuner).')
-            data.update({'pruner': 'hyperband'})
+            data.update({'pruner': 'median'})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
@@ -310,8 +311,8 @@ class Manager:
                 yaml.safe_dump(data, writer)
 
         if 'n_startup_trials' not in data.keys():
-            logger.info('No n_startup_trials was specified. Config value "n_startup_trials" set to 0.')
-            data.update({'n_startup_trials': 0})
+            logger.info('No n_startup_trials was specified. Config value "n_startup_trials" set to 5.')
+            data.update({'n_startup_trials': 10})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
@@ -329,7 +330,7 @@ class Manager:
 
         if 'n_evaluations' not in data.keys():
             logger.info('No n_evaluations was specified. Config value "n_evaluations" set to 2.')
-            data.update({'n_evaluations': 2})
+            data.update({'n_evaluations': 5})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
@@ -338,22 +339,15 @@ class Manager:
             data.update({'n_jobs': 1})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
-
-        if 'eval_freq' not in data.keys():
-            logger.info('No eval_freq was specified for the eval callback. Config value "eval_freq" set to 10000.')
-            data.update({'eval_freq': 10000})
-            with open(path_to_config, "w") as writer:
-                yaml.safe_dump(data, writer)
-
         if 'n_trials' not in data.keys():
             logger.info('No n_trials was specified. Config value "n_trials" set to 500.')
-            data.update({'n_trials': 500})
+            data.update({'n_trials': 10})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
         if 'n_warmup_steps' not in data.keys():
             logger.info('No n_warmup_steps was specified. Config value "n_warmup_steps" set to 0.')
-            data.update({'n_warmup_steps': 0})
+            data.update({'n_warmup_steps': 10})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
@@ -380,7 +374,7 @@ class Manager:
         self.n_timesteps = data['n_timesteps']
         self.n_jobs = data['n_jobs']
         self.n_evaluations = data['n_evaluations']
-        self.eval_freq = data['eval_freq']
+        # self.eval_freq = data['eval_freq']
         self.n_trials = data['n_trials']
         self.n_warmup_steps = data['n_warmup_steps']
         self.n_min_trials = data['n_min_trials']
@@ -474,8 +468,8 @@ class Manager:
                     yaml.safe_dump(data, writer)
             if 'lower' not in data.keys():
                 logger.info('Pruner is ThresholdPruner, but min_resource is not specified. '
-                            'Config value "lower" set to 0.0')
-                data.update({'lower': 0.0})
+                            'Config value "lower" set to 0.5')
+                data.update({'lower': 0.5})
                 with open(path_to_config, "w") as writer:
                     yaml.safe_dump(data, writer)
             self.upper = data['upper']
@@ -492,6 +486,12 @@ class Manager:
                 logger.info('Sampler is NSGAIISampler, but population_size is not specified. '
                             'Config value "population_size" set to 50')
                 data.update({'population_size': 50})
+                with open(path_to_config, "w") as writer:
+                    yaml.safe_dump(data, writer)
+            if data['pruner'] != 'none':
+                logger.info('Sampler is NSGAIISampler, but this sampler cannot be used alongside a pruner.'
+                            'Config value "pruner" set to none')
+                data.update({'pruner': 'none'})
                 with open(path_to_config, "w") as writer:
                     yaml.safe_dump(data, writer)
             if 'mutation_prob' not in data.keys():
@@ -552,12 +552,12 @@ class Manager:
             return SuccessiveHalvingPruner()
         elif pruner == "median":
             return MedianPruner(n_startup_trials=self.n_startup_trials,
-                                n_warmup_steps=self.n_evaluations // 3,
+                                n_warmup_steps=self.n_warmup_steps,
                                 # interval_steps=self.eval_freq,
                                 n_min_trials=self.n_min_trials)
         elif pruner == "patient":
             wrapped_pruner = MedianPruner(n_startup_trials=self.n_startup_trials,
-                                          n_warmup_steps=self.n_evaluations // 3,
+                                          n_warmup_steps=self.n_warmup_steps,
                                           # interval_steps=self.eval_freq,
                                           n_min_trials=self.n_min_trials)
             return PatientPruner(wrapped_pruner=wrapped_pruner,
@@ -566,7 +566,7 @@ class Manager:
         elif pruner == "percentile":
             return PercentilePruner(n_startup_trials=self.n_startup_trials,
                                     percentile=self.percentile,
-                                    n_warmup_steps=self.n_evaluations // 3,
+                                    n_warmup_steps=self.n_warmup_steps,
                                     # interval_steps=self.eval_freq,
                                     n_min_trials=self.n_min_trials)
         elif pruner == "hyperband":
@@ -577,7 +577,7 @@ class Manager:
         elif pruner == "threshold":
             return ThresholdPruner(lower=self.lower,
                                    upper=self.upper,
-                                   n_warmup_steps=self.n_evaluations // 3)
+                                   n_warmup_steps=self.n_warmup_steps)
             # interval_steps=self.eval_freq)
         elif pruner == "none":
             return NopPruner()  # Do not prune
@@ -665,16 +665,15 @@ class Manager:
 
         run = {'_id': get_uuid(),
                'trial': trial.params,
-                'name': study_name,
-                'energy_consumed': energy_consumed,
-                'cpu_model': cpu_model,
-                'gpu_model': gpu_model,
-                'CO2_emissions': emissions,
-                'alg': self.alg,
-                'env': self.env,
-                'total_time': duration,
-                'reward': trial.value}
-
+               'name': study_name,
+               'energy_consumed': energy_consumed,
+               'cpu_model': cpu_model,
+               'gpu_model': gpu_model,
+               'CO2_emissions': emissions,
+               'alg': self.alg,
+               'env': self.env,
+               'total_time': duration,
+               'reward': trial.value}
 
         print("Posting...")
 

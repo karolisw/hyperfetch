@@ -5,9 +5,10 @@ Fields used in the model classes as attributes.
 from pydantic import Field
 
 # # Package # #
-from utils.common import get_uuid
+from utils.db_utils import get_uuid
 
 __all__ = "RunFields"
+
 
 class RunFields:
     run_id = Field(
@@ -17,13 +18,13 @@ class RunFields:
         max_length=36
     )
     trial = Field(
-        description= "Best performing hyperparameters for the run"
+        description="Best performing hyperparameters for the run"
     )
     name = Field(
         description="String concatation of environment name and algorithm name",
         example="LunarLander-v2_ppo"
     )
-    energy_consumed= Field(
+    energy_consumed = Field(
         description="The energy (kWh) consumed by the device that ran the run"
     )
     cpu_model = Field(

@@ -23,7 +23,7 @@ policy: MlpPolicy
 post_run: true
 pruner: median
 reduction_factor: 3.0
-reward_threshold: -500
+reward_threshold: null
 sampler: tpe
 seed: 1
 trial_log_path: logs/trials

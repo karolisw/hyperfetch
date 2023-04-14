@@ -1,4 +1,7 @@
 import logging
+from time import time
+from typing import Union
+from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from config.auth_connection import MONGODB_URL, MAX_CONNECTIONS_COUNT, MIN_CONNECTIONS_COUNT
@@ -27,3 +30,13 @@ async def close_motor_connection() -> None:
     logging.info("Disconnecting from mongoDB...")
     db.client.close()
     logging.info("Disconnected.")
+
+
+def get_time(seconds_precision=True) -> Union[int, float]:
+    """Returns the current time as Unix/Epoch timestamp, seconds precision by default"""
+    return time() if not seconds_precision else int(time())
+
+
+def get_uuid() -> str:
+    """Returns an unique UUID (UUID4)"""
+    return str(uuid4())

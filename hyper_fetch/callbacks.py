@@ -1,7 +1,6 @@
 import optuna
 from typing import Optional
-from stable_baselines3.common.callbacks import BaseCallback, EvalCallback, StopTrainingOnRewardThreshold
-from stable_baselines3.common.logger import TensorBoardOutputFormat
+from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.vec_env import VecEnv
 
 
