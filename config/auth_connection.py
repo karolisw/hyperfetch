@@ -11,10 +11,8 @@ MIN_CONNECTIONS_COUNT = int(os.getenv("MIN_CONNECTIONS_COUNT", 10))
 
 ALLOWED_HOSTS = CommaSeparatedStrings(os.getenv("ALLOWED_HOSTS", "http://localhost:5173"))
 
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017/runs?authSource=admin")
-MONGO_DB = os.getenv("MONGO_DB", "runs")
+MONGODB_URL = os.getenv("MONGODB_URL")
+MONGO_DB = os.getenv("MONGO_DB")
 
 database_name = MONGO_DB
-# database_name = "runs"
 run_collection_name = "run"
-user_collection_name = "user"
