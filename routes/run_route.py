@@ -32,6 +32,7 @@ async def fetch_runs_for_env(env: str, db: AsyncIOMotorClient = Depends(get_data
     runs = await list_best_runs_for_env(conn=db, env=env)
     return runs
 
+
 @router.get("/alg_top_trials", response_description="List the top trials for selected algorithm x env combo",
             response_model=RunsRead)
 async def fetch_runs_for_env_alg(env: str, alg: str, limit: int, db: AsyncIOMotorClient = Depends(get_database)):

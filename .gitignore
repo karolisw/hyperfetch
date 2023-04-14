@@ -3,10 +3,10 @@
 venv
 .mypy_cache
 tests/.pytest_cache
-hyper_fetch/logs
+hyperfetch/logs
 *.xml
 main.py
 .env
 .codecarbon.config
 *.ini
-hyper_fetch/emissions.csv
+hyperfetch/emissions.csv

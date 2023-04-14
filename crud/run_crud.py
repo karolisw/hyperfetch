@@ -2,7 +2,7 @@
 Methods that interact with the database
 '''
 
-from hyper_fetch.alg_samplers import SUPPORTED_ALGORITHMS
+from hyperfetch.alg_samplers import SUPPORTED_ALGORITHMS
 from models.create_run import RunCreate
 from typing import List
 from config.mongodb import AsyncIOMotorClient
