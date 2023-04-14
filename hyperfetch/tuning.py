@@ -1,8 +1,8 @@
-from hyper_fetch.manager import Manager
+from hyperfetch.manager import Manager
 from codecarbon import EmissionsTracker
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-from hyper_fetch.util import get_yaml_val
+from hyperfetch.util import get_yaml_val
 
 storage = get_yaml_val("../config/no_auth_connection.yml", "url")
 db = get_yaml_val("../config/no_auth_connection.yml", "db")
@@ -34,8 +34,7 @@ async def tune(config_path) -> None:
             trial=best_trial,
             client=storage,
             db=db,
-            collection=collection,
-            study_name=manager.name
+            collection=collection
         )
 
 

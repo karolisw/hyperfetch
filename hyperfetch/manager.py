@@ -21,9 +21,9 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
 from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from hyper_fetch.util import *
-from hyper_fetch.alg_samplers import ALG_HP_SAMPLER
-from hyper_fetch.callbacks import TrialEvalCallback, ThresholdExceeded
+from hyperfetch.util import *
+from hyperfetch.alg_samplers import ALG_HP_SAMPLER
+from hyperfetch.callbacks import TrialEvalCallback, ThresholdExceeded
 from utils.db_utils import get_uuid
 
 
@@ -151,14 +151,14 @@ class Manager:
         # Do not prune before 1/3 of the max budget is used.
         # pruner = MedianPruner(n_startup_trials=N_STARTUP_TRIALS, n_warmup_steps=N_EVALUATIONS // 3)
 
-        study = optuna.create_study(sampler=sampler, pruner=pruner, study_name=self.name,
+        study = optuna.create_study(sampler=sampler, pruner=pruner, study_name=self.project_name,
                                     direction="maximize")
         try:
             if self.reward_threshold is None:
                 study.optimize(self.objective, n_jobs=self.n_jobs, n_trials=self.n_trials)  # , timeout=600)
             else:
                 study.optimize(self.objective, n_jobs=self.n_jobs, n_trials=self.n_trials,
-                               callbacks=[check_threshold])  # todo remove the reward threshold from here
+                               callbacks=[check_threshold])
         except ThresholdExceeded:
             print('Threshold exceeded: {} > {}'.format(study.best_value, self.reward_threshold))
 
@@ -231,7 +231,7 @@ class Manager:
         stream = open(path_to_config, 'r')
         data = yaml.safe_load(stream)  # dict
 
-        if 'log_folder' not in data.keys():  # todo cannot log this here
+        if 'log_folder' not in data.keys():
             data.update({'log_folder': 'logs'})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
@@ -248,6 +248,14 @@ class Manager:
 
         if 'env' not in data.keys():
             logger.error("An environment 'env' must be specified in config at path %s",
+                         path_to_config, stack_info=True)
+
+        if 'git_link' not in data.keys():
+            logger.error("A link to project repository 'git_link' must be specified in config at path %s",
+                         path_to_config, stack_info=True)
+
+        if 'project_name' not in data.keys():
+            logger.error("The name of the project 'project_name' must be specified in config at path %s",
                          path_to_config, stack_info=True)
 
         policy_list = {"MlpPolicy", "CnnPolicy", "MultiInputPolicy"}
@@ -278,17 +286,6 @@ class Manager:
         if 'frame_stack' not in data.keys():
             logger.info('frame_stack not specified. Config value "frame_stack" set to "None".')
             data.update({'frame_stack': None})
-            with open(path_to_config, "w") as writer:
-                yaml.safe_dump(data, writer)
-
-        # Used for finding elements in MongoDB -> name == env + alg
-        if 'name' not in data.keys():
-            # now = datetime.now()
-            env = data['env']
-            alg = data['alg']
-            name = env + "_" + alg  # + "_" + now.strftime("%d/%m/%Y_%H:%M:%S")
-            logger.info('No name was specified for the study. Config value "name" set to %s.', name)
-            data.update({'name': name})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
@@ -357,15 +354,18 @@ class Manager:
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
 
-        # Assign the now verified parameters to the Manager
+        # Assign the mandatory parameters to the Manager
         self.alg = data['alg']
         self.env = data['env']
+        self.git_link = data['git_link']
+        self.project_name = data['project_name']
+
+        # Assign the other parameters as well
         self.policy = data['policy']
         self.reward_threshold = data['reward_threshold']
         self.post_run = data['post_run']
         self.n_envs = data['n_envs']
         self.frame_stack = data['frame_stack']
-        self.name = data['name']
         self.sampler = data['sampler']
         self.pruner = data['pruner']
         self.seed = data['seed']
@@ -374,7 +374,6 @@ class Manager:
         self.n_timesteps = data['n_timesteps']
         self.n_jobs = data['n_jobs']
         self.n_evaluations = data['n_evaluations']
-        # self.eval_freq = data['eval_freq']
         self.n_trials = data['n_trials']
         self.n_warmup_steps = data['n_warmup_steps']
         self.n_min_trials = data['n_min_trials']
@@ -644,7 +643,7 @@ class Manager:
 
         return env
 
-    async def save_trial(self, trial, client, db, collection, study_name) -> None:
+    async def save_trial(self, trial, client, db, collection) -> None:
 
         # Creating connection
         my_client = motor.AsyncIOMotorClient(client)
@@ -661,17 +660,18 @@ class Manager:
         gpu_model = last_row['gpu_model']
         emissions = last_row['emissions']
 
-        print("Creating dict...")
+        print("Preparing best trial...")
 
         run = {'_id': get_uuid(),
                'trial': trial.params,
-               'name': study_name,
                'energy_consumed': energy_consumed,
                'cpu_model': cpu_model,
                'gpu_model': gpu_model,
                'CO2_emissions': emissions,
                'alg': self.alg,
                'env': self.env,
+               'git_link': self.git_link,
+               'project_name': self.project_name,
                'total_time': duration,
                'reward': trial.value}
 
