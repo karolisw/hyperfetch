@@ -92,6 +92,11 @@ export default createStore({
         try {
             response = await service.fetchAlgs(selected_env.selected_env)
             .then(response => {
+                response.data.forEach(element => {
+                    element.reward = parseFloat(element.reward).toFixed(3)
+                    element.energy_consumed = parseFloat(element.energy_consumed).toFixed(3)
+                    element.CO2_emissions = parseFloat(element.CO2_emissions).toFixed(3)
+                });
                 commit('SET_CURRENT_ENV', selected_env.selected_env)
                 commit('SET_ALGS', response.data)
             })
@@ -116,6 +121,10 @@ export default createStore({
             else {
                 await service.fetchRun(id)
                 .then(response => {
+                    response.data.CO2_emissions = parseFloat(response.data.CO2_emissions).toFixed(4)
+                    response.data.energy_consumed = parseFloat(response.data.energy_consumed).toFixed(4)
+                    response.data.reward = parseFloat(response.data.reward).toFixed(4)
+            
                     commit('SET_CURRENT_RUN', response.data)
                 })
             }
@@ -138,9 +147,9 @@ export default createStore({
             response = await service.fetchBestRuns(params.env, params.alg, params.limit)
             .then(response => {
                 response.data.forEach(element => {
-                    element.reward = parseFloat(element.reward).toFixed(4)
-                    element.energy_consumed = parseFloat(element.energy_consumed).toFixed(4)
-                    element.CO2_emissions = parseFloat(element.CO2_emissions).toFixed(5)
+                    element.reward = parseFloat(element.reward).toFixed(3)
+                    element.energy_consumed = parseFloat(element.energy_consumed).toFixed(3)
+                    element.CO2_emissions = parseFloat(element.CO2_emissions).toFixed(3)
                 });
                 commit('SET_RUNS', response.data)
             })

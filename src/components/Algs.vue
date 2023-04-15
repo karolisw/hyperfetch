@@ -27,8 +27,8 @@ export default {
     // Define grid headers
     this.columnDefs= [
       { headerName: "", field: "", cellRenderer: "AlgCellRenderer", minWidth:50, maxWidth: 100},
-      { headerName: "Algorithm", field: "full", minWidth: 150 },
-      { headerName: "Best reward", field: "reward",  maxWidth: 150 },  
+      { headerName: "Algorithm", field: "full", minWidth: 150, maxWidth:280, cellStyle: {textAlign: 'left'} },
+      { headerName: "Best reward", field: "reward",  maxWidth: 200 },  
     ]
 
     // Define grid structure
@@ -93,12 +93,12 @@ export default {
 </script>
 
 <template>
-<div class="algContainer" id="selectedRows1">
+<div class="alg-container" id="selectedRows1">
   <h2>Step 1: Select your algorithm</h2>
   <ag-grid-vue 
   @grid-ready="onGridReady"
   @selection-changed="onSelectAlgorithm"
-  style="width: 90vh; height: 35vh;"
+  style="width: 70vh; height: 35vh;"
   class="ag-theme-alpine"
   :rowSelection="rowSelection"
   :columnDefs="columnDefs"

@@ -43,9 +43,8 @@ export default {
   <section class="home">
     <div class="text container">
       <h2>Fetch Your Hyperparameters</h2>
-      <hr />
-      <h4>In need of hyperparameters for your Reinforcement Learning project? </h4>
-      <h4>We have the solution. </h4>
+      <h4>Recreate or find optimal hyperparameters for your Reinforcement Learning project. </h4>
+      <h4>Try it out! </h4>
       <label> {{ errorLabel }}</label>
       <div class="text-center">
         <v-menu id="menu"
@@ -57,6 +56,11 @@ export default {
               v-bind="props"
             >
               Environment
+              <v-icon
+              end
+              icon="mdi-chevron-down"
+              size="large"
+        ></v-icon>
             </v-btn>
           </template>
           <v-list >
@@ -78,6 +82,7 @@ export default {
 
 <style lang="scss" scoped>
   .home {
+    padding-top: 25px;
     background-image: url('../assets/home.jpg');
     background-attachment: fixed;
     background-repeat: round;

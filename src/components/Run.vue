@@ -19,8 +19,8 @@ export default {
 
     // Define grid headers for hyper-parameter grid
     this.columnParams= [
-      { headerName: "Param", field: "param", minWidth: 100 },
-      { headerName: "Value", field: "value",  minWidth: 150 },
+      { headerName: "Param", field: "param", minWidth: 100, cellStyle: {textAlign: 'left'} },
+      { headerName: "Value", field: "value",  minWidth: 150, cellStyle: {textAlign: 'left'} },
     ]
 
     // Define grid headers for stats grid   
@@ -30,8 +30,8 @@ export default {
           if (params.data.param === 'CO2 emissions' || params.data.param === 'Energy consumed' || params.data.param === 'Total time') return envDetails;
           else return undefined;
         }, minWidth:50, maxWidth: 100 },
-      { headerName: "Stats", field: "param", minWidth: 100},
-      { headerName: "", field: "value",  minWidth: 150 }, 
+      { headerName: "Stats", field: "param", minWidth: 100, maxWidth:200, cellStyle: {textAlign: 'left'}},
+      { headerName: "Value", field: "value",  minWidth: 150, cellStyle: {textAlign: 'left'} }, 
     ]
 
     this.defaultColDef = {
@@ -102,6 +102,8 @@ export default {
       this.statData.push({ param: "Reward", value: run.reward }) 
       this.statData.push({ param: "CPU model", value: run.cpu_model })
       this.statData.push({ param: "GPU model", value: run.gpu_model })
+      this.statData.push({ param: "Project name", value: run.project_name })
+      this.statData.push({ param: "Git link", value: run.git_link })
 
       updateData(this.statData)
     }
@@ -115,7 +117,7 @@ export default {
       <h3>Step 3: View stats for run</h3>
       <ag-grid-vue id="stats"
         @grid-ready="onGridReadyStats"
-        style="width: 50vh; height: 40vh"
+        style="width: 80vh; height: 40vh"
         class="ag-theme-alpine"
         :defaultColDef="defaultColDef"
         :columnDefs="columnStats"
@@ -127,7 +129,7 @@ export default {
       <h3>Step 4: View hyperparameters for run</h3>
       <ag-grid-vue id="hyperparameters"
       @grid-ready="onGridReadyHyperparameters"
-      style="width: 50vh; height: 40vh"
+      style="width: 80vh; height: 60vh"
       class="ag-theme-alpine"
       :defaultColDef="defaultColDef"
       :columnDefs="columnParams"
@@ -148,6 +150,10 @@ export default {
 .run-stats {
   margin-top: 5%;
   margin-bottom: 3%;
+}
+
+#hyperparameters {
+  margin-bottom: 10vh;
 }
 
 .run-stats, #stats {

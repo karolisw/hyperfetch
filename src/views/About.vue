@@ -1,23 +1,24 @@
 <template>
-    <v-container class="about-container" align="center">
-        <v-row class="header">
+    <v-container class="about-container" align="start">
+        <v-row class="description">
             <v-col cols="12">
                 <h2>Hi! This is HyperFetch </h2>
                 <h3>Smart and environmentally concious</h3>
             </v-col>
         </v-row>
 
-        <v-row class="case main-section intro rounded">
+        <v-row class="case main-section rounded">
             <v-col cols="4">
                 <div class="card-container">
                     <div class="card mix-4">
                         <h4>Fast</h4>
+                        <hr>
                         <br>
-                        <span class="link-arrow">⟶</span> <a target="_blank" href="https://vitejs.dev/">Vue + Vite</a>
+                        <span class="link-arrow">⟶</span> <a class="a2" href="https://vitejs.dev/">Vue + Vite</a>
                         <br>
-                        <span class="link-arrow">⟶</span> <a target="_blank" href="https://fastapi.tiangolo.com/">FastAPI</a>
+                        <span class="link-arrow">⟶</span> <a class="a2" href="https://fastapi.tiangolo.com/">FastAPI</a>
                         <br>
-                        <span class="link-arrow">⟶</span> <a target="_blank" href="https://www.mongodb.com/">MongoDB</a>
+                        <span class="link-arrow">⟶</span> <a class="a2" href="https://www.mongodb.com/">MongoDB</a>
                         <br>
 			        </div>
                 </div>
@@ -26,6 +27,7 @@
                 <div class="card-container">
                     <div class="card mix-4">
                         <h4>Easy to use</h4>
+                        <hr>
                         <p>Pip-package abstracts away difficulties of tuning hyperparameters </p>
                     </div>
                 </div>
@@ -34,6 +36,7 @@
                 <div class="card-container">
                     <div class="card mix-4">
                         <h4> Eco-Concious </h4>
+                        <hr>
                         <p> Tracks CO2 emissions using hardware and local electricity-grid</p>
 			        </div>
                 </div>
@@ -57,8 +60,10 @@
                             <a class="small" href="https://mlco2.github.io/impact/#compute">mlco2</a>
                         ) the total emissions are only 7.5 pounds. 
                         However, this application proposes the idea that training only has to happen for new problems. When sharing optimized hyperparameters for an environment such that others can reuse them, aquiring good hyperparameters much more environmentally friendly. 
+                        <br>
+                        Read more about 
+                        <a class="small" href="https://www.nature.com/articles/s42256-022-00529-w">Machine learning's environmental impact<span class="link-arrow">⟶</span></a>
                     </p>
-                    <a target="_blank" href="https://www.nature.com/articles/s42256-022-00529-w">nature.com<span class="link-arrow">⟶</span></a>
                 </div>
             </v-col>
         </v-row>
@@ -68,7 +73,7 @@
                 <div class="image-container ">
 				    <img src="../assets/about/hurdle.webp" alt="Tuning hyperparameters is very important for output of good model parameters">			
                 </div>
-                <div class="text box-left">
+                <div class="text box-right">
                     <h2>HyperFetch terminates a big hurdle within RL</h2>
                     <p> Reinforcement learning (RL) with its many components and vast amount of blackboxing can be very hard to understand for those just entering the field. 
                     <br><br>
@@ -85,12 +90,12 @@
             </v-col>
         </v-row>
 
-        <v-row class="case peach main-section"> 
+        <v-row class="case blue main-section"> 
             <v-col>
-                <div class="video-container ">
+                <div class="image-container ">
                     <img src="../assets/about/keyboard.gif">
                 </div>
-                <div class="text box-left">
+                <div class="text box-right">
                     <h2>For researchers: HyperFetch aims to increase reproductability</h2>
                     <p> Without hyperparameters it can be next to impossible to reproduce other projects' results -especially when those projects are performed with great amounts of processing power. 
                         <br><br>
@@ -105,9 +110,8 @@
                         are not linked to specific projects, but are ranked in order of best to least reward. 
                         We aim to make the line between real breakthrough and product showcase less fuzzy. 
                         <br><br>
-                        Read more about the replication crisis at:
-                        <br>
-                        <a target="_blank" href="https://www.technologyreview.com/2020/11/12/1011944/artificial-intelligence-replication-crisis-science-big-tech-google-deepmind-facebook-openai/">technologyreview.com <span class="link-arrow">⟶</span></a>
+                        Read more about the replication crisis at: 
+                        <a class="small" href="https://www.technologyreview.com/2020/11/12/1011944/artificial-intelligence-replication-crisis-science-big-tech-google-deepmind-facebook-openai/">technologyreview.com <span class="link-arrow">⟶</span></a>
 
                     </p>
                 </div>
@@ -115,13 +119,16 @@
         </v-row>
 
         <v-row class="main-section dependencies">
-            <v-col>
+            <v-col> 
+                <div class="description">
+                    <h2>The application relies on:</h2>
+                </div>
+
                 <div class="image-container right">
 				    <img src="../assets/about/dependencies.webp" alt="The dependencies of the application">			
                 </div>
                 <div class="card-container">
-                    <h2>The application relies on:</h2>
-                    <div class="card mix-1">
+                    <div class="card-long mix-1">
                         <h4>Optuna </h4>
                         <p> Optuna is a hyperparameter optimization framework with a great trade-off between runtime and performance score. 
                             To read about the how's and why's, read the
@@ -130,14 +137,14 @@
                             <a href="https://optuna.readthedocs.io/en/stable/">Optuna docs</a>.
                         </p>
 			        </div>
-                    <div class="card mix-2">
+                    <div class="card-long mix-2">
                         <h4>Stable-Baselines3</h4>
                         <p> Stable-Baselines3 is a set of reliable implementations of reinforcement learning algorithms in PyTorch.
                             You can read more at the 
                             <a href="https://stable-baselines3.readthedocs.io/en/master/">SB3 docs </a>
                         </p>
 			        </div>
-                    <div class="card mix-3">
+                    <div class="card-long mix-3">
                         <h4>CodeCarbon</h4>
                         <p> CodeCarbon is a lightweight software package stimates the amount of carbon dioxide (CO2) produced by the cloud or personal computing resources used to execute code. 
                             You can read more about the initiative at the 
@@ -187,10 +194,6 @@ export default {
 <style lang="scss" scoped>
 .about-container {
 
-    @media (min-width: 900px) {
-        margin: auto;
-    }
-
     h2 {
         @media (min-width: 900px) {
             font-size: 48px;
@@ -211,15 +214,15 @@ export default {
         line-height: 109.12%;
     }
 
-    .header {
-        text-align: center;
+    .description {
+        text-align: left;
         width: 330px;
         color: #33373d;
         margin: 10px 10px 10px 10px;
 
         @media (min-width: 900px) {
             width: 850px;
-            margin: 40px 40px 40px 40px;
+            margin: 70px 40px 60px 25px;
         }
 
         h2 {
@@ -230,12 +233,8 @@ export default {
         }
     }
 
-    .intro {
-        background: #4745be78;
-    }
-
     .dependencies {
-        margin-top: -185px;
+        margin-top: -5vh;
     }
 
     .right {
@@ -251,6 +250,8 @@ export default {
         }
         
         .card-container {
+            margin-top: 8vh;
+            margin-left: 40px;
 
             h4 {
                 font-style: normal;
@@ -260,8 +261,9 @@ export default {
             }
 
             p {
-                margin-top: 16px;
-                margin-bottom: 16px
+                margin-top: 20px;
+                line-height: 25px;
+                font-size: 16px;
             }
 
             a {
@@ -269,14 +271,17 @@ export default {
                 color: #f0885d;
                 font-weight: 600;
                 font-size: 18px;
-                line-height: 30px;
+                line-height: 25px;
             }
 
             .card {
-                box-shadow: 0 3px 6px rgba(174, 174, 174, 0.678),0 3px 6px rgba(174, 174, 174, 0.64);
-                padding: 20px;
                 border-radius: 8px;
-                margin: 15px;
+                width: 50%;
+            }
+            .card-long {
+                margin:  30px 30px 30px 30px;
+                padding: 10px 10px 10px 10px;
+                border-radius: 8px;
                 width: 50%;
             }
             .mix-1 {
@@ -294,10 +299,10 @@ export default {
                 color: rgb(71, 69, 190);
             }
             .mix-4 {
-                width: 200px;
+                width: 60%;
                 height: 200px;
-                background-color: #ffffff;
-                color: rgb(71, 69, 190);
+                background-color: #8c9eff;
+                color: rgb(0, 0, 0);
             }
         }
 
@@ -315,16 +320,6 @@ export default {
             max-width: 1240px;
             margin: 0 auto;
             margin-bottom: 0px;
-            
-            .image-container {
-                width: 70%;
-                @media(min-width: 900px) {
-                    margin: 0 auto;
-                    margin-right: auto;
-                    margin-left: auto;
-                    width: 80%;
-                }
-            }
 
             .text {
                 padding: 25px;
@@ -337,26 +332,16 @@ export default {
             .blue {
             margin-bottom: 80px;
             }
-
-            .video-container {
-                border-radius: 5px 0 0 5px;
-                max-width: 50%;
-                @media(min-width: 900px) {
-                    transform: translateY(0);
-                    width: 100%;
-                    border-radius: 5px;
-                }
-            }
         }
     }
 }
 
 .case.blue .text {
     transform: translateY(-40px);
-    background: #33373d;
+    background: #5c7e65;
     color: #fdf1eb;
     @media(min-width: 900px) {
-        transform: translateY(-20%);
+        transform: translateY(-15%);
     }
 }
 
@@ -365,14 +350,11 @@ export default {
     max-height: 375px;
     @media(min-width: 900px) {
         margin-left: auto;
-        margin-right: 5%;
+        margin-right: 10%;
         width: 80%;
     }
-    .background {
-        background-color: #fdf1eb;
-    }
     img {
-        width: 60%;
+        width: 65%;
         object-fit: cover;
 
         @media(min-width: 900px) {
@@ -381,13 +363,32 @@ export default {
         }
     }
 }
-
-.link-arrow {
-  animation-name: example;
-  animation-duration: 1s;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-in-out;
+@keyframes a1 {
+    0% {
+         margin-left: 2px;
+    }
+    50% {
+        margin-left: 10px;
+    }
+    100% {
+        margin-left: 2px;
+    }
 }
+.link-arrow {
+        animation-name: a1;
+        animation-duration: 1s;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out;
+        font-size: 24px;
+        line-height: 28px;
+        margin-left: 15px;
+        position: absolute;
+        @media(min-width: 900px) {
+            font-size: 24px;
+            line-height: 28px;
+            margin-left: 15px;
+        }
+    }
 
 .case.peach .text {
     transform: translateY(-60px);
@@ -411,15 +412,9 @@ body .box-right {
     }
 }
 
-body .box-left {
-    padding: 50px 50px 50px 50px;
-    width: 70%;
-    margin-top: 30px;
-    border-radius: 0 5px 5px 0;
-    margin-right: auto;
-    @media(min-width: 900px) {
-        border-radius: 5px;
-    }
+.a2 {
+    margin-left: 50px;
+    color: #9d3810 !important;
 }
 
 body a {
@@ -431,18 +426,6 @@ body a {
     a:hover {
             color: #c56339;
             font-weight: 700;
-            }
-
-    .link-arrow {
-        font-size: 22px;
-        line-height: 24px;
-        margin-left: 20px;
-        position: absolute;
-        @media(min-width: 900px) {
-            font-size: 24px;
-            line-height: 28px;
-            margin-left: 15px;
-        }
     }
 }
 .footer {
@@ -450,7 +433,7 @@ body a {
     text-align: center;
     width: 330px;
     margin: 30px 10px 10px 10px;
-    padding-bottom: 150px;
+    padding-bottom: 50px;
 
     @media (min-width: 900px) {
         width: 600px;

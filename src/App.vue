@@ -6,6 +6,11 @@
     components: {
       Navbar,
     },
+    data() {
+      return {
+        links: ["https://github.com/karolisw/hyperFetch"],
+      }
+    }
   }
 </script>
 <template>
@@ -18,6 +23,23 @@
       </transition>
     </router-view>
     </div>
+    <v-footer class="bg-blue-grey-darken-4">
+      <v-row justify="center" no-gutters>
+        <v-btn
+          v-for="link in links"
+          :key="link"
+          color="white"
+          variant="text"
+          class="mx-2"
+          rounded="xl"
+        >
+          {{ link }}
+        </v-btn>
+        <v-col class="text-center mt-4" cols="12">
+          {{ new Date().getFullYear() }} — <strong>Karoline Sund Wahl @NTNU</strong>
+        </v-col>
+      </v-row>
+    </v-footer>  
   </v-app>
 </template>
 
@@ -31,9 +53,15 @@
   font-family: "Raleway", sans-serif;
   font-weight: 400;
 }
+
+html, body {
+  font-family: "Raleway", sans-serif;
+  font-style: normal;
+}
 .app {
   min-height: 100vh;
   position: relative;
+  font-family: "Raleway", sans-serif;
   background-color: #8c9eff;
 }
 
