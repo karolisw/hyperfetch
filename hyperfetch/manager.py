@@ -4,6 +4,7 @@ import logging.config
 from datetime import datetime
 from pprint import pprint
 from time import time
+from benedict import benedict
 
 import gym
 import motor.motor_asyncio as motor
@@ -614,7 +615,7 @@ class Manager:
 
         # Wrap the env into a VecNormalize wrapper if needed
         # and load saved statistics when present
-        env = normalize_if_needed(env, eval_env)  # todo comment out if fails
+        env = normalize_if_needed(env, eval_env)
 
         # Optional Frame-stacking
         if self.frame_stack is not None:
@@ -660,9 +661,12 @@ class Manager:
         gpu_model = last_row['gpu_model']
         emissions = last_row['emissions']
 
+        run_id = get_uuid()
+
         print("Preparing best trial...")
 
-        run = {'_id': get_uuid(),
+
+        run = {'_id': run_id,
                'trial': trial.params,
                'energy_consumed': energy_consumed,
                'cpu_model': cpu_model,
@@ -679,6 +683,64 @@ class Manager:
 
         await my_client[db][collection].insert_one(run)
         print("Posted!")
+        print("\n\nTo filter-search for your run on the website, use the run ID:\n ", run_id + "\n")
+
+
+    async def save_custom(self, client, db, collection) -> None:
+
+        # Creating connection
+        my_client = motor.AsyncIOMotorClient(client)
+
+        # Convert hyperparameters from YAML to Python dict
+        config_dict = benedict.from_yaml(self.config_path)
+        hyperparameters = config_dict['hyperparameters']
+
+        run_id = get_uuid()
+        print("Preparing config hyperparameters for persistance...")
+
+        run = {'_id': run_id,
+               'trial': hyperparameters,
+               'alg': self.alg,
+               'env': self.env,
+               'git_link': self.git_link,
+               'project_name': self.project_name}
+
+        # Add energy consumed to run
+        if 'energy_consumed' not in config_dict.keys():
+            run['energy_consumed'] = None
+        else:
+            run['energy_consumed'] = config_dict['energy_consumed']
+
+        # Add CO2 emissions to run
+        if 'CO2_emissions' not in config_dict.keys():
+            run['CO2_emissions'] = None
+        else:
+            run['CO2_emissions'] = config_dict['CO2_emissions']
+
+        # Add CPU model to run
+        if 'cpu_model' not in config_dict.keys():
+            run['cpu_model'] = None
+        else:
+            run['cpu_model'] = config_dict['cpu_model']
+
+        # Add GPU model to run
+        if 'gpu_model' not in config_dict.keys():
+            run['gpu_model'] = None
+        else:
+            run['gpu_model'] = config_dict['gpu_model']
+
+        # Add total time to run
+        if 'total_time' not in config_dict.keys():
+            run['total_time'] = None
+        else:
+            run['total_time'] = config_dict['total_time']
+
+        print("Posting...")
+
+        await my_client[db][collection].insert_one(run)
+        print("Posted!")
+        print("\n\nTo filter-search for your run on the website, use the run ID:\n ", run_id + "\n")
+
 
 
 if __name__ == '__main__':

@@ -38,5 +38,22 @@ async def tune(config_path) -> None:
         )
 
 
+async def save_custom_parameters(config_path: str) -> None:
+    """
+    Method that allows researchers/developers/students to persist their hyperparameters.
+    This method is only for posting hyperparameters that have not been tuned using
+    HyperFetch. Thus, there is no way of posting reward alongside these hyperparameters
+    as the reward cannot be validated by HyperFetch. However, the user must still add
+    project_name and git_link to config file; and there is nothing in the way of posting
+    the reward there (git).
+    :param config_path: The path to the config file (.yaml). Can be a new file or the same
+                        as for the tuning() method.
+    :return: Nothing is returned. The hyperparameters are posted.
+    """
+    manager = Manager(config_path=config_path)
+    await manager.save_custom(client=storage, db=db, collection=collection)
+
+
 if __name__ == "__main__":
+    #asyncio.run(save_custom_parameters(config_path="../config/tuning_parameters.yml"))
     asyncio.run(tune(config_path="../config/tuning_parameters.yml"))
