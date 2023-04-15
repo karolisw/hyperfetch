@@ -7,6 +7,5 @@ hyperfetch/logs
 *.xml
 main.py
 .env
-.codecarbon.config
 *.ini
 hyperfetch/emissions.csv
