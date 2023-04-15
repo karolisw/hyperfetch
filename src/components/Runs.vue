@@ -32,10 +32,13 @@ export default {
     this.gridOptions = {};
 
     this.columnDefs= [
-        { headerName: "ID", field: "id"},
-        { headerName: "Reward", field: "reward"},
-        { headerName: "Energy Usage (kWh)", field: "energy"},  
-        { headerName: "Emissions (kg CO2)", field: "co2" },  
+        { headerName: "ID", field: "id", maxWidth: 185, wrapText:true, autoHeight:true},
+        { headerName: "Reward", field: "reward", maxWidth: 150, cellStyle: {textAlign: 'center'}, wrapText:true, autoHeight:true},
+        { headerName: "Energy Usage (kWh)", field: "energy",  maxWidth: 180, cellStyle: {textAlign: 'center'}, wrapText:true, autoHeight:true},  
+        { headerName: "Emissions (kg CO2)", field: "co2",  maxWidth: 170, cellStyle: {textAlign: 'center'}, wrapText:true, autoHeight:true },  
+        { headerName: "Project name", field: "project_name", maxWidth: 170, cellStyle: {textAlign: 'left'}, wrapText:true, autoHeight:true },  
+        { headerName: "Git link", field: "git_link", cellStyle: {textAlign: 'left'},wrapText:true, autoHeight:true },  
+
       ]
 
     this.defaultColDef = {
@@ -49,7 +52,8 @@ export default {
   },
 
   created() { 
-    this.rowSelection = 'single';
+    this.rowSelection = 'single'
+    this.domLayout = "autoHeight"
     this.currentEnv = this.$store.getters.GET_CURRENT_ENV
     this.runs = this.$store.getters.GET_RUNS  
     this.rowData = this.immutableStore
@@ -62,6 +66,7 @@ export default {
       gridApi: null, 
       columnApi: null,
       defaultColDef: null,
+      domLayout: null,
       runs: [], 
       columnDefs: [],
       immutableStore: [],
@@ -101,7 +106,9 @@ export default {
           id: element.run_id, 
           reward: element.reward, 
           energy: element.energy_consumed, 
-          co2: element.CO2_emissions
+          co2: element.CO2_emissions,
+          project_name: element.project_name,
+          git_link: element.git_link
         })
       }
 
@@ -130,7 +137,9 @@ export default {
           id: element.run_id, 
           reward: element.reward, 
           energy: element.energy_consumed, 
-          co2: element.CO2_emissions
+          co2: element.CO2_emissions,
+          project_name: element.project_name,
+          git_link: element.git_link
         })
       }
 
@@ -143,17 +152,18 @@ export default {
 </script>
 
 <template>  
-<div id="selectedRows2">
+<div class="runs-container" id="selectedRows2">
   <h2>Step 2: Select a run</h2>
   <ag-grid-vue 
   @grid-ready="onGridReady"
   @selection-changed="onSelectRun"
-  style="width: 90vh; height: 50vh"
+  style="width: 130vh;"
   class="ag-theme-alpine"
   :defaultColDef="defaultColDef"
   :rowSelection="rowSelection"
   :columnDefs="columnDefs"
   :rowData="rowData"
+  :domLayout="domLayout"
   :animateRows="true">
   >
   </ag-grid-vue>
@@ -166,7 +176,7 @@ export default {
   --ag-border-color:rgb(57, 59, 51);
 
   --ag-secondary-border-color: none;
-  --ag-font-size: 15px;
+  --ag-font-size: 13px;
   --ag-foreground-color: rgb(57, 59, 51);
   --ag-background-color: rgb(248, 235, 253);
   --ag-header-foreground-color: rgb(57, 59, 51);

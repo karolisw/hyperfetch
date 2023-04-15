@@ -3,16 +3,25 @@
         <section id="parameters">
                 <section class="text box light-bg">
                     <h1>
-                        Config parameters (docs)
+                        Parameters for configuration file
                     </h1>
-                    <h3>
-                        The intention of these parameters is to help users provide additional details for their RL project to better aid in the search for hyperparameters.
-                    </h3>
+                    <br>
+                    <ol>
+                        <li><a href="#main-parameters">Parameters for tuning and persisting using HyperFetch</a></li>
+                        <li><a href="#pruners">Parameters usable with specific pruner </a></li>
+                        <li><a href="#samplers">Parameters usable with specific sampler</a></li>
+                        <li><a href="#external-parameters">Parameters for persisting hyperparameters not produced using HyperFetch</a></li>
+                    </ol>
+                    <br>
+                    <p>
+                        The intention of these parameters is to help users provide additional details for HyperFetch when tuning their RL project. 
+                        This will aid in optimizing the search for hyperparameters.
+                    </p>
                 </section>
             <section id="main-parameters">
                 <div class="text box has-table dark-bg">
-                    <h3>All-Round Parameters</h3>
-                    <p>These parameters can be used with any sampler and pruner.</p>
+                    <h3>Parameters for tuning and persisting using HyperFetch.</h3>
+                    <p>These parameters can be used with <i>any</i> sampler and pruner.</p>
                 </div>
                 <div class="ag-table">
                     <ag-grid-vue 
@@ -27,7 +36,7 @@
                 </div>
             </section>
 
-            <section class="pruners"> 
+            <section class="pruners" id="pruners"> 
                 <div class="text box light-bg">
                     <h2> Pruners</h2>
                     <p>Optuna is the framework that tunes the hyperparameters inside of the application. Whilst HyperFetch with its single-function API makes the optimization seeminly more of a black-box; 
@@ -35,21 +44,20 @@
                         The pruner decides which trials perform well enough to keep training, and which trials to end. 
                     </p>
                 </div>
-                <section class="text box dark-bg">
+                <section class="text box dark-bg" id="sh-pruner">
                     <h3>SuccessiveHalvingPruner</h3>
                     <p> The SuccessiveHalvingPruner uses an Asynchronous Successive Halving Algorithm. Successive Halving is a bandit-based algorithm
                         that identifies the best one among multiple configurations. This pruner implements an asynchronous 
                         version of Successive Halving.  
                         The SuccessiveHalving pruner is derived of the 
-                        <a target="_blank" href="https://arxiv.org/abs/1810.05934">Massively Parallel </a> hyperparameter tuning paper.
+                        <a class="small" href="https://arxiv.org/abs/1810.05934">Massively Parallel </a> hyperparameter tuning paper.
                     </p>
                 </section>
                 <section class="text box dark-bg">
                     <h3>Median Pruner</h3>
-                    <p>The median pruner uses the median stopping rule. The median stopping rule says that the 
-                        <code class="docutils literal notranslate">
-                            <span class="pre">trial</span>
-                        </code>
+                    <p>The median pruner uses the median stopping rule. 
+                        <br>
+                        The median stopping rule says that the Trial
                         should be pruned if the best intermediate result is worse than the median of intermediate results of previous trials at the same step.
                         This pruner is the default pruner of the application.
                     </p>
@@ -96,54 +104,26 @@
                     <div class="text box has-table dark-bg">
                         <h3>Hyperband Pruner</h3>
                         <p>The hyperband pruner is derived of the 
-                            <a target="_blank" href="https://www.jmlr.org/papers/volume18/16-558/16-558.pdf">Hyperband paper</a>.
-                            If you use 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">HyperbandPruner</span>
-                            </code>
-                            with 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">TPESampler</span>
-                            </code>
-                            , it's recommended to consider setting larger 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">n_trials</span>
-                            </code>
-                            to make full use of the characteristics of 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">TPESampler</span>
-                            </code>
-                            .This is because 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">TPESampler</span>
-                            </code>
-                            uses a number of (default: 10) 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">Trial</span>s
-                            </code>
-                            for its startup. As Hyperband runs multiple 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">SuccessiveHalvingPruner</span>
-                            </code>
-                            and collects trials 
-                            based on the current 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">Trial</span>
-                            </code>'s
-                            bracket ID, each bracket needs to observe more than 10 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">Trial</span>s
-                            </code>
-                            for 
-                            <code class="docutils literal notranslate">
-                                <span class="pre">TPESampler</span>
-                            </code> 
-                            to adapt its search space. Selecting the number of pruners for this pruner to have is done by choosing values for 
-                            <a href="#main-parameters">min_resource</a>, 
-                            <a href="#main-parameters">max_resource</a> and 
-                            <a href="#main-parameters">reduction_factor</a>
-                            (Please see Section 3.6 of the <a target="_blank" href="https://www.jmlr.org/papers/volume18/16-558/16-558.pdf">original paper</a> for details).
-                            Moving on if - for example - HyperbandPruner has 4 pruners in it, at least 4 x 10 trials are consumed for startup.
+                            <a class="small" href="https://www.jmlr.org/papers/volume18/16-558/16-558.pdf">Hyperband paper</a>.
+                            <br>
+                            If you use hyperband pruner with 
+                            <a class="small" href="#tpe-sampler">TPESampler</a> , it's recommended to consider setting larger
+                            <a class="small" href="#main-parameters">n_trials</a> to make full use of the characteristics of 
+                            <a class="small" href="#tpe-sampler">TPESampler</a> .This is because
+                            <a class="small" href="#tpe-sampler">TPESampler</a> uses a number of (default: 10)
+                            <a class="small" href="#main-parameters">Trials</a> for its startup. As Hyperband runs multiple 
+                            <a class="small" href="#sh-pruner">SuccessiveHalvingPruner</a> and collects trials based on the current 
+                            <a class="small" href="#main-parameters">Trials</a> bracket ID, each bracket needs to observe more than 10 
+                            <a class="small" href="#main-parameters">Trials</a> for
+                            <a class="small" href="#tpe-sampler">TPESampler</a> to adapt its search space. 
+                            <br>
+                            Selecting the number of pruners for this pruner to have is done by choosing values for 
+                            <a class="small" href="#main-parameters">min_resource</a>, 
+                            <a class="small" href="#main-parameters">max_resource</a> and 
+                            <a class="small" href="#main-parameters">reduction_factor</a>
+                            (see Section 3.6 of the <a class="small" href="https://www.jmlr.org/papers/volume18/16-558/16-558.pdf">original paper</a> for details).
+                            <br><br>
+                            <strong>Example</strong>: If HyperbandPruner has 4 pruners in it, at least 4 x 10 trials are consumed for startup.
                         </p>
                         </div>
                         <div class="ag-table">
@@ -182,22 +162,22 @@
                 </section>
 
             </section>
-            <section class="samplers">
+            <section class="samplers" id="samplers">
                 <div class="text box light-bg">
                     <h2> Samplers</h2>
                     <p>Optuna combines two types of sampling strategies, which are called relative sampling and independent sampling.
                         Read more about them 
-                        <a target="_blank" href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.BaseSampler.html#optuna.samplers.BaseSampler">here</a>.
+                        <a class="small" href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.BaseSampler.html#optuna.samplers.BaseSampler">here</a>.
                         The application utilizes all Samplers except the GridSampler due to the nature of the RL problem (too many combinations).
                         For a better understanding of when to use which sampler, see the 
-                        <a target="_blank" href="https://optuna.readthedocs.io/en/stable/reference/samplers/index.html">comparison chart</a>.
+                        <a class="small" href="https://optuna.readthedocs.io/en/stable/reference/samplers/index.html">comparison chart</a>.
                     </p>
                 </div>
                 <section>
                     <div class="text has-table box dark-bg">
                         <h3>NSGAIISampler</h3>
                         <p>The NSGAII sampler is a multi-objective sampler that uses the 
-                            <a target="_blank" href="https://ieeexplore.ieee.org/document/996017">NSGA-II algorithm</a>.
+                            <a class="small" href="https://ieeexplore.ieee.org/document/996017">NSGA-II algorithm</a>.
                             NSGA-II stands for “Nondominated Sorting Genetic Algorithm II”. NSGA-II is a well known, fast and elitist multi-objective genetic algorithm.
                         </p>
                     </div>
@@ -217,40 +197,28 @@
                     <h3>RandomSampler</h3>
                     <p>The random sampler uses random sampling. This sampler is based on independent sampling. 
                         See also 
-                        <a target="_blank" href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.BaseSampler.html#optuna.samplers.BaseSampler">BaseSampler</a>
+                        <a class="small" href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.BaseSampler.html#optuna.samplers.BaseSampler">BaseSampler</a>
                         for more details of 'independent sampling'.
                     </p>
                 </section>
                 <section class="text box dark-bg">
                     <h3>CmaEsSampler</h3>
                     <p>The CmaEs sampler is a sampler that uses 
-                        <a target="_blank" href="https://github.com/CyberAgentAILab/cmaes">cmaes</a>. CMAES stands for "(Lightweight) Covariance Matrix Adaptation Evolution Strategy".
+                        <a class="small" href="https://github.com/CyberAgentAILab/cmaes">cmaes</a>. CMAES stands for "(Lightweight) Covariance Matrix Adaptation Evolution Strategy".
                     </p>
                 </section>
-                <section class="text box dark-bg">
+                <section class="text box dark-bg" id="tpe-sampler">
                     <h3>TPESampler</h3>
                     <p>The TPE sampler is a multi-objective sampler that uses the TPE (Tree-structured Parzen Estimator) algorithm. 
                         This sampler is based on independent sampling.  See also 
-                        <a target="_blank" href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.BaseSampler.html#optuna.samplers.BaseSampler">BaseSampler</a>
+                        <a class="small" href="https://optuna.readthedocs.io/en/stable/reference/samplers/generated/optuna.samplers.BaseSampler.html#optuna.samplers.BaseSampler">BaseSampler</a>
                         for more details of 'independent sampling'.
-
-                        On each trial, for each parameter, TPE fits one Gaussian Mixture Model (GMM) 
-                        <code class="docutils literal notranslate">
-                            <span class="pre">l(x)</span>
-                        </code>
-                        to the set of parameter values associated with the best objective values, and another GMM 
-                        <code class="docutils literal notranslate">
-                            <span class="pre">g(x)</span>
-                        </code>
-                        to the remaining parameter values. 
-                        It chooses the parameter value 
-                        <code class="docutils literal notranslate">
-                            <span class="pre">x</span>
-                        </code>
-                        that maximizes the ratio 
-                        <code class="docutils literal notranslate">
-                            <span class="pre">l(x)/g(x)</span>
-                        </code>.
+                        <br> 
+                        On each trial, for each parameter, TPE fits one Gaussian Mixture Model (GMM) &nbsp;
+                        <strong>l(x)</strong> &nbsp; to the set of parameter values associated with the best objective values, and another GMM &nbsp;
+                        <strong>g(x)</strong> &nbsp; to the remaining parameter values. It chooses the parameter value &nbsp;
+                        <strong>x</strong> &nbsp; that maximizes the ratio &nbsp;
+                        <strong>l(x)/g(x)</strong>.
                     </p>
                 </section>
                 <section class="text box dark-bg">
@@ -258,11 +226,42 @@
                         <h3>SkoptSampler</h3>
                         <p>The skopt sampler uses Scikit-Optimize as the backend. This sampler optimizes its hyperparameters by optimizing a simple quadratic equation.
                             Read more 
-                            <a target="_blank" href="https://optuna.readthedocs.io/en/stable/reference/generated/optuna.integration.SkoptSampler.html#optuna.integration.SkoptSampler">here</a>.
+                            <a class="small" href="https://optuna.readthedocs.io/en/stable/reference/generated/optuna.integration.SkoptSampler.html#optuna.integration.SkoptSampler">here</a>.
                             No parameters are available for this sampler and it will run as default. 
                         </p>
                     </div>
                 </section>
+            </section>
+
+            <section id="external-parameters">
+                <div class="text box light-bg">
+                    <h2>Parameters for persisting hyperparameters not produced using HyperFetch</h2>
+                    <p>This section is relevant for those who wish to post their hyperparameters to HyperFetch,
+                        without having tuned said hyperparameters using HyperFetch. 
+                    </p>
+                </div>
+                <div class="ag-table">
+                    <ag-grid-vue 
+                    @grid-ready="onExternalReady"
+                    style="width: 120vh;"
+                    class="ag-theme-alpine-dark"
+                    :columnDefs="columnDefs"
+                    :defaultColDef="defaultColDef"
+                    :rowData="rowExternal"
+                    :domLayout="domLayout">
+                    </ag-grid-vue>
+                </div>
+                <v-btn class="up-btn"
+                    v-scroll="onScroll"
+                    v-show="fab"
+                    color="indigo darken-3"
+                    @click="toTop">
+                    <v-icon
+                        center
+                        icon="mdi-chevron-double-up"
+                        size="x-large">
+                    </v-icon>          
+                </v-btn>
             </section>
         </section>
     </div>
@@ -302,6 +301,8 @@ export default {
         this.data = {
             "alg (str)": "Required. Reinforcement learning algorithms build a model of the environment by sampling the states, taking actions, and observing the rewards. Also called agent. ",
             "env (str)": "Required. The environment is where the agent learns and decides what actions to perform. In HyperFetch, environments from Stable-Baselines3 are used.",
+            "project_name (str)": "Required. Is the name of the project that the hyperparameters belong to. If the hyperparameters are not related to a project, simply assign an empty string to this parameter.",
+            "git_link (str)": "Required. Is the link to the Git repository connected to the project your hyperparameters belong to. If the project is not uploaded to Git, simply assign an empty string to this parameter.",
             "sampler (str)": "A sampler has the responsibility to determine the parameter values to be evaluated in a trial. Defaults to TPE.",
             "pruner (str)": "Returns a boolean value representing whether the trial should be pruned. Default pruner is the MedianPruner.",
             "frame_stack (int)": "The number of frames to stack when using VecFrameStack (stacking wrapper for vectorized environment). Designed for image observations, meaning environments where the state is RGB-arrays.",
@@ -314,7 +315,6 @@ export default {
             "n_timesteps (int)": "Timesteps for the RL model.",
             "n_trials (int)": "The number of trials for each process. None represents no limit in terms of the number of trials. The study continues to create trials until the number of trials reaches n_trials, or until receiving a SIGTERM -or SIGINT signal.",
             "n_warmup_steps (int)": "Pruning is disabled if the step is less than the given number of warmup steps.",
-            "name (str)": "Study's name. If this argument is set to None, a unique name is generated automatically.",
             "policy (str)": "The decision-making function (control strategy) of the agent, which represents a mapping from situations to actions.",
             "post_run (bool)": "Whether or not to post the best performing hyperparameters of the study to HyperFetch.",
             "reward_threshold (float)": "A threshold for early stopping. The program will stop (even if all trials are not completed) when this reward threshold is reached.",
@@ -344,7 +344,17 @@ export default {
         this.patience = {
             "min_delta (float)": "Tolerance value to check whether or not the objective improves. This value should be non-negative.",
             "patience (int)": "Pruning is disabled until the objective doesn't improve for patience consecutive steps.",
-
+        }
+        this.external = {
+            "alg (str)": "Required. Reinforcement learning algorithms build a model of the environment by sampling the states, taking actions, and observing the rewards. Also called agent. ",
+            "env (str)": "Required. The environment is where the agent learns and decides what actions to perform. In HyperFetch, environments from Stable-Baselines3 are used.",
+            "project_name (str)": "Required. Is the name of the project that the hyperparameters belong to. If the hyperparameters are not related to a project, simply assign an empty string to this parameter.",
+            "git_link (str)": "Required. Is the link to the Git repository connected to the project your hyperparameters belong to. If the project is not uploaded to Git, simply assign an empty string to this parameter.",
+            "CO2_emissions": "The CO2 emissions (kgs) produced by tuning your hyperparameters. Use only when posting hyperparameters not tuned with HyperFetch.",
+            "energy_consumed": "The kWh spent tuning your hyperparameters.Use only when posting hyperparameters not tuned with HyperFetch.",
+            "cpu_model": "The CPU model used to tune your hyperparameters. If you have used a Cloud hosting platform or something of the sort, it's enough to name it. Use only when posting hyperparameters not tuned with HyperFetch.",
+            "gpu_model": "The GPU model used to tune your hyperparameters. If you have used a Cloud hosting platform or something of the sort, it's enough to name it. Use only when posting hyperparameters not tuned with HyperFetch.",
+            "total_time": "The total time spent tuning your hyperparameters. Format: Hours:Minutes:Seconds:Miliseconds. Use only when posting hyperparameters not tuned with HyperFetch.",
         }
     },
 
@@ -361,12 +371,15 @@ export default {
             hyperband: [],
             percentile: [],
             patience: [],
+            external: [],
             rowData: [],
             rowNsgaii: [],
             rowThreshold: [],
             rowHyperband: [],
             rowPercentile: [],
             rowPatience: [],
+            rowExternal: [],
+            fab: false
         }
     },
     methods: {
@@ -452,9 +465,34 @@ export default {
         for (const [key, value] of Object.entries(this.hyperband)) {
             this.rowHyperband.push({parameter: key, description: value})
         }
-       
         updateData(this.rowHyperband)
         },
+
+        onExternalReady(params) {
+        this.gridApi = params.api;
+        this.gridColumnApi = params.columnApi;
+
+        const updateData = (data) => params.api.setRowData(data);
+
+        // Format data
+        for (const [key, value] of Object.entries(this.external)) {
+            this.rowExternal.push({parameter: key, description: value})
+        }
+        updateData(this.rowExternal)
+        },
+
+        onScroll (e) {
+            if (typeof window === 'undefined') return
+            const top = window.pageYOffset ||   e.target.scrollTop || 0
+            this.fab = top > 20
+        },
+        toTop () {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });    
+    },
     }
 }
 </script>
@@ -464,30 +502,21 @@ export default {
     --ag-borders: 5px;
     --ag-borders-critical: solid 1px;
     --ag-critical-border-color:var(--ag-foreground-color);
-    --ag-border-color: #e5dbdb;
     --ag-background-color:  #33373d;
     --ag-foreground-color: #fdf1eb;
+    --ag-header-background-color: rgb(43, 102, 43);
 }
 
 .config-container {
     display: flex;
     justify-content: center;
-    margin-top: 4%;
-    margin-bottom: 4%;
+    margin-left: 100px;
 
-    
-    #intro {
-        margin-top: 40px;
-        margin-bottom: 40px;
+    .up-btn {
+        margin-left: 130vh;
     }
-
     .ag-table {
-        margin-left: 25vh;
-        margin-bottom: 50px;
-
-        @media(min-width: 900px) {
-            margin-bottom:140px;
-    }
+        margin-top: 5px;
     }
     .text {
         h1 {
@@ -507,17 +536,15 @@ export default {
         }
 
         p {
-            margin-top: 16px;
-            margin-bottom: 16px;
             font-size: 16px;
-            line-height: 24px;
+            line-height: 28px;
         }
 
         a {
             text-decoration: none;
             color: #f0885d;
             font-weight: 700;
-            font-size: 18px;
+            font-size: 20px;
             line-height: 30px;
         }
 
@@ -527,17 +554,28 @@ export default {
         }
         
         code {
-            padding: 2px 5px;
+            padding: 1px 3px;
+            margin-left: 2px;
+            margin-right: 2px;
             background: #fff;
             border: 1px solid #e1e4e5;
-            font-size: 75%;
             color: #e74c3c;
             overflow-x: auto;
             .literal {
                 color: #e74c3c;
                 white-space: normal;
             }
+            .pre {
+                font-weight: bold;
+            }
         }
+    }
+
+    .small {
+        font-weight: 400 !important;
+        line-height: 20px !important;
+        font-size: 16px !important;
+        text-decoration: none;
     }
 
     .dark-bg {
@@ -546,17 +584,16 @@ export default {
     }
 
     .light-bg {
+        margin-top: 80px !important;
         background: #fbdacb;
         color:#202020;
-        border-style: solid;
-        border-color: rgb(14, 58, 202);
     }
 
     .box {
-        padding: 40px 40px 40px 40px;
-        width: 70%;
-        margin-left: 20px;
-        margin-top: 30px;
+        padding: 30px 30px 30px 30px;
+        width: 73%;
+        margin-top: 50px;
+        margin-bottom: 50px;
         border-radius: 5px;
 
         @media(min-width: 900px) {
@@ -564,10 +601,10 @@ export default {
         }
     }
     .has-table {
-            margin-top:100px !important;
-            margin-left:25vh !important;
-            border-style: outset;
-            border-color: rgb(14, 58, 202);
-        }
+            margin-bottom: 0px !important;
+    }
+    #external-parameters {
+        margin-bottom:35vh;
+    }
 }
 </style>
