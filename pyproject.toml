@@ -7,7 +7,7 @@ where = ["src"]
 include = ["hyperfetch"]
 
 [project]
-name = "hyperfetch_karolisw6"
+name = "hyperfetch_karolisw7"
 version = "0.1.0"
 authors = [
   { name="Karoline Sund Wahl", email="karolies.wahl@gmail.com" },

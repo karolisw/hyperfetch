@@ -14,7 +14,7 @@ client = AsyncIOMotorClient(storage)
 tracker = EmissionsTracker()
 
 
-async def tune() -> None:
+def tune() -> None:
     """
     :return: Nothing is returned. Results from trials are written to log-folder.
              Best hyperparameters are written to console for the user to see.
@@ -36,12 +36,12 @@ async def tune() -> None:
 
     # Post trial along with the tracking data unless user's config file states not to
     if manager.post_run:
-        await manager.save_trial(
+        asyncio.run(manager.save_trial(
             trial=best_trial,
             client=storage,
             db=db,
             collection=collection
-        )
+        ))
 
 
 def save() -> None:
