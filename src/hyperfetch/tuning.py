@@ -1,12 +1,12 @@
-from hyperfetch.manager import Manager
+import argparse
+from .manager import Manager
 from codecarbon import EmissionsTracker
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-from hyperfetch.util import get_yaml_val
 
-storage = get_yaml_val("../config/no_auth_connection.yml", "url")
-db = get_yaml_val("../config/no_auth_connection.yml", "db")
-collection = get_yaml_val("../config/no_auth_connection.yml", "collection")
+storage = "mongodb://localhost:27017/runs?authSource=admin"
+db = "runs"
+collection = "run"
 
 client = AsyncIOMotorClient(storage)
 
@@ -14,14 +14,20 @@ client = AsyncIOMotorClient(storage)
 tracker = EmissionsTracker()
 
 
-async def tune(config_path) -> None:
+async def tune() -> None:
     """
-    :param config_path: Path to configuration file (.yml).
     :return: Nothing is returned. Results from trials are written to log-folder.
              Best hyperparameters are written to console for the user to see.
     """
+    parser = argparse.ArgumentParser(description='"tune" script allows for tuning hyperparameters '
+                                                 'in HyperFetch. Hyperparameters are also persisted unless'
+                                                 '"post_run" is explicitly configured as "false" in config file.')
+    parser.add_argument('config_path', type=str, help='The path to the config file (.yaml).')
+
+    args = parser.parse_args()
+
     tracker.start()
-    manager = Manager(config_path=config_path)
+    manager = Manager(config_path=args.config_path)
 
     # Best performing trial is returned as FrozenTrial
     best_trial = manager.run()
@@ -38,7 +44,7 @@ async def tune(config_path) -> None:
         )
 
 
-async def save_custom_parameters(config_path: str) -> None:
+def save() -> None:
     """
     Method that allows researchers/developers/students to persist their hyperparameters.
     This method is only for posting hyperparameters that have not been tuned using
@@ -46,14 +52,13 @@ async def save_custom_parameters(config_path: str) -> None:
     as the reward cannot be validated by HyperFetch. However, the user must still add
     project_name and git_link to config file; and there is nothing in the way of posting
     the reward there (git).
-    :param config_path: The path to the config file (.yaml). Can be a new file or the same
-                        as for the tuning() method.
     :return: Nothing is returned. The hyperparameters are posted.
     """
-    manager = Manager(config_path=config_path)
-    await manager.save_custom(client=storage, db=db, collection=collection)
+    parser = argparse.ArgumentParser(description='"save" script allows for persisting hyperparameters that are not '
+                                                 'tuned in HyperFetch.')
+    parser.add_argument('config_path', type=str, help='The path to the config file (.yaml). Can be a new file or t'
+                                                      'he same as for the tuning() method.')
 
-
-if __name__ == "__main__":
-    #asyncio.run(save_custom_parameters(config_path="../config/tuning_parameters.yml"))
-    asyncio.run(tune(config_path="../config/tuning_parameters.yml"))
+    args = parser.parse_args()
+    manager = Manager(config_path=args.config_path)
+    asyncio.run(manager.save_custom(client=storage, db=db, collection=collection))

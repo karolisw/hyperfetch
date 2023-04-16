@@ -22,10 +22,9 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.preprocessing import is_image_space, is_image_space_channels_first
 from stable_baselines3.common.vec_env import VecTransposeImage, is_vecenv_wrapped
 from stable_baselines3.common.vec_env.vec_frame_stack import VecFrameStack
-from hyperfetch.util import *
-from hyperfetch.alg_samplers import ALG_HP_SAMPLER
-from hyperfetch.callbacks import TrialEvalCallback, ThresholdExceeded
-from utils.db_utils import get_uuid
+from .util import *
+from .alg_samplers import ALG_HP_SAMPLER
+from .callbacks import TrialEvalCallback, ThresholdExceeded
 
 
 def _select_model(alg, **kwargs):
@@ -43,10 +42,10 @@ def _select_model(alg, **kwargs):
 
 class Manager:
     def __init__(self, config_path):
-        '''
+        """
         :param config_path: Must be specified to avoid error
 
-        '''
+        """
         self.start_time = datetime.now()
         self.end_time = datetime.now()
         self.config_path = config_path
@@ -174,16 +173,13 @@ class Manager:
         for key, value in trial.params.items():
             print("    {}: {}".format(key, value))
 
-        print("  User attrs:")
-        for key, value in trial.user_attrs.items():
-            print("    {}: {}".format(key, value))
-
         report_name = (
             f"report_{self.env}_{self.n_trials}-trials-{self.n_timesteps}"
             f"-{self.sampler}-{self.pruner}_{int(time())}"
         )
         # This is where the report will be written to
         log_path = os.path.join(self.log_folder, self.alg, report_name)
+        print("Writing report to %s", log_path)
         self.logger.info("Writing report to %s", log_path)
 
         # Write report
@@ -665,7 +661,6 @@ class Manager:
 
         print("Preparing best trial...")
 
-
         run = {'_id': run_id,
                'trial': trial.params,
                'energy_consumed': energy_consumed,
@@ -684,7 +679,6 @@ class Manager:
         await my_client[db][collection].insert_one(run)
         print("Posted!")
         print("\n\nTo filter-search for your run on the website, use the run ID:\n ", run_id + "\n")
-
 
     async def save_custom(self, client, db, collection) -> None:
 
@@ -740,7 +734,6 @@ class Manager:
         await my_client[db][collection].insert_one(run)
         print("Posted!")
         print("\n\nTo filter-search for your run on the website, use the run ID:\n ", run_id + "\n")
-
 
 
 if __name__ == '__main__':

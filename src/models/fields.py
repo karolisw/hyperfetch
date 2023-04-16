@@ -5,7 +5,7 @@ Fields used in the model classes as attributes.
 from pydantic import Field
 
 # # Package # #
-from utils.db_utils import get_uuid
+from src.utils.db_utils import get_uuid
 
 __all__ = "RunFields"
 

@@ -6,7 +6,7 @@ from typing import List
 import pydantic
 from .create_run import RunCreate
 from .fields import RunFields
-from models.base_model import BaseModel
+from src.models.base_model import BaseModel
 
 __all__ = ("RunRead", "RunsRead", "EnvRead", "EnvsRead")
 

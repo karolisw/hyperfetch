@@ -2,10 +2,10 @@
 *.idea
 venv
 .mypy_cache
-tests/.pytest_cache
-hyperfetch/logs
+src/tests/.pytest_cache
+src/hyperfetch/logs
 *.xml
 main.py
 .env
 *.ini
-hyperfetch/emissions.csv
+src/hyperfetch/emissions.csv

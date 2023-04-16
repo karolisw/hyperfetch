@@ -1,4 +1,6 @@
 import os
+from uuid import uuid4
+
 import yaml
 from stable_baselines3.common.vec_env import VecEnv, VecNormalize
 
@@ -7,6 +9,11 @@ def get_yaml_val(config_path: str, key: str) -> str:
     stream = open(config_path, 'r')
     data = yaml.safe_load(stream)
     return data[key]
+
+
+def get_uuid() -> str:
+    """Returns an unique UUID (UUID4)"""
+    return str(uuid4())
 
 
 def normalize_if_needed(env: VecEnv, eval_env: bool) -> VecEnv:

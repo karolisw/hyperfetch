@@ -2,7 +2,7 @@
 Run Create model. Inherits from PersonUpdate, but all the required fields must be re-defined
 """
 from .fields import RunFields
-from models.base_model import BaseModel
+from src.models.base_model import BaseModel
 from typing import Dict,Union
 
 __all__ = ("RunCreate",)
