@@ -299,12 +299,12 @@ export default {
 
         // Parameters and values    
         this.data = {
-            "alg (str)": "Required. Reinforcement learning algorithms build a model of the environment by sampling the states, taking actions, and observing the rewards. Also called agent. ",
-            "env (str)": "Required. The environment is where the agent learns and decides what actions to perform. In HyperFetch, environments from Stable-Baselines3 are used.",
+            "alg (str)": "Required. Available values: PPO, SAC, DQN, TD3 and A2C. Reinforcement learning algorithms build a model of the environment by sampling the states, taking actions, and observing the rewards. Also called agent. ",
+            "env (str)": "Required. Available values: Gym Classic Control environments. The environment is where the agent learns and decides what actions to perform. In HyperFetch, environments from Stable-Baselines3 are used.",
             "project_name (str)": "Required. Is the name of the project that the hyperparameters belong to. If the hyperparameters are not related to a project, simply assign an empty string to this parameter.",
             "git_link (str)": "Required. Is the link to the Git repository connected to the project your hyperparameters belong to. If the project is not uploaded to Git, simply assign an empty string to this parameter.",
-            "sampler (str)": "A sampler has the responsibility to determine the parameter values to be evaluated in a trial. Defaults to TPE.",
-            "pruner (str)": "Returns a boolean value representing whether the trial should be pruned. Default pruner is the MedianPruner.",
+            "sampler (str)": "Available values: See 'Sampler' section further down. A sampler has the responsibility to determine the parameter values to be evaluated in a trial. Defaults to TPE.",
+            "pruner (str)": "Available values: See 'Pruner' section further down. Returns a boolean value representing whether the trial should be pruned. Default pruner is the MedianPruner.",
             "frame_stack (int)": "The number of frames to stack when using VecFrameStack (stacking wrapper for vectorized environment). Designed for image observations, meaning environments where the state is RGB-arrays.",
             "log_folder (str)": "Should contain the folder that the user wishes to log trials to. Defaults to 'logs'.",
             "n_envs (int)": "The number of environments.",
@@ -315,8 +315,8 @@ export default {
             "n_timesteps (int)": "Timesteps for the RL model.",
             "n_trials (int)": "The number of trials for each process. None represents no limit in terms of the number of trials. The study continues to create trials until the number of trials reaches n_trials, or until receiving a SIGTERM -or SIGINT signal.",
             "n_warmup_steps (int)": "Pruning is disabled if the step is less than the given number of warmup steps.",
-            "policy (str)": "The decision-making function (control strategy) of the agent, which represents a mapping from situations to actions.",
-            "post_run (bool)": "Whether or not to post the best performing hyperparameters of the study to HyperFetch.",
+            "policy (str)": "Available values: MlpPolicy, CnnPolicy and MultiInputPolicy. MlpPolicy is the only advisable policy to use with the classic control environments. The decision-making function (control strategy) of the agent, which represents a mapping from situations to actions.",
+            "post_run (bool)": "Whether or not to post the best performing hyperparameters of the study to HyperFetch. Defaults to True.",
             "reward_threshold (float)": "A threshold for early stopping. The program will stop (even if all trials are not completed) when this reward threshold is reached.",
             "seed (int)": "Seed for the samplers Random number generator. Defaults to 0.",
             "trial_log_path (str)": "The path to where the results for each trial will be saved. Defaults to 'logs/trials'",
