@@ -236,7 +236,7 @@ class Manager:
         # Create the logger and log folder (unless it exists)
         self.log_folder = data['log_folder']
         create_log_folder(self.log_folder)
-        self._create_logger("test_logger")
+        self._create_logger("hyperfetch")
         logger.info('Path to log folder: "{}"'.format(self.log_folder))
 
         if 'alg' not in data.keys():
@@ -246,18 +246,24 @@ class Manager:
         if 'env' not in data.keys():
             logger.error("An environment 'env' must be specified in config at path %s",
                          path_to_config, stack_info=True)
+            logger.info("Environments currently available are those within 'classic control'. See: "
+                        "https://gymnasium.farama.org/environments/classic_control/")
 
         if 'git_link' not in data.keys():
             logger.error("A link to project repository 'git_link' must be specified in config at path %s",
                          path_to_config, stack_info=True)
+            logger.info("If you are using HyperFetch with no correlation to a Git-proejct, "
+                        "simply give the parameter an empty string as value. ")
 
         if 'project_name' not in data.keys():
             logger.error("The name of the project 'project_name' must be specified in config at path %s",
                          path_to_config, stack_info=True)
+            logger.info("If you are using HyperFetch with no correlation to a Git-proejct, "
+                        "simply give the parameter an empty string as value. ")
 
-        policy_list = {"MlpPolicy", "CnnPolicy", "MultiInputPolicy"}
-        if 'policy' not in data.keys() or 'policy' not in policy_list:
-            logger.info('No policy was specified. Config value "policy" set to "MlpPolicy"')
+        if 'policy' not in data.keys() :
+            logger.info('No policy was specified. Config value "policy" set to "MlpPolicy". '
+                        'Policies available: "MlpPolicy", "CnnPolicy", "MultiInputPolicy"')
             data.update({'policy': 'MlpPolicy'})
             with open(path_to_config, "w") as writer:
                 yaml.safe_dump(data, writer)
@@ -734,8 +740,3 @@ class Manager:
         await my_client[db][collection].insert_one(run)
         print("Posted!")
         print("\n\nTo filter-search for your run on the website, use the run ID:\n ", run_id + "\n")
-
-
-if __name__ == '__main__':
-    manager = Manager(config_path="../config/tuning_parameters.yml")
-    manager.run()

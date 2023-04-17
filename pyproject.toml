@@ -7,12 +7,12 @@ where = ["src"]
 include = ["hyperfetch"]
 
 [project]
-name = "hyperfetch_karolisw7"
-version = "0.1.0"
+name = "hyperfetch"
+version = "1.0.0"
 authors = [
   { name="Karoline Sund Wahl", email="karolies.wahl@gmail.com" },
 ]
-description = "HyperFetch. An interface for optimizing RL hyperparameters through the HyperFetch API. "
+description = "HyperFetch. A tool to optimize and fetch hyperparameters for your reinforcement learning application."
 readme = "README.md"
 requires-python = ">=3.9"
 license = {file = "LICENSE"}
@@ -168,5 +168,5 @@ dependencies = [
 "Source" = "https://github.com/karolisw/hyperFetch"
 
 [project.scripts]
-tune = "hyperfetch.tuning:tune"
-save = "hyperfetch.tuning:save"
+tune = "hyperfetch.tuning:tune_cli"
+save = "hyperfetch.tuning:save_cli"
