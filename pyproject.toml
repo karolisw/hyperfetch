@@ -8,9 +8,9 @@ include = ["hyperfetch"]
 
 [project]
 name = "hyperfetch"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
-  { name="Karoline Sund Wahl", email="karolies.wahl@gmail.com" },
+  { name="Karoline Sund Wahl", email="karolines.wahl@gmail.com" },
 ]
 description = "HyperFetch. A tool to optimize and fetch hyperparameters for your reinforcement learning application."
 readme = "README.md"
