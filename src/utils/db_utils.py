@@ -20,11 +20,7 @@ def create_aliased_response(model: BaseModel) -> JSONResponse:
 
 async def connect_to_motor() -> None:
     logger.info("Connecting to mongoDB...")
-    db.client = AsyncIOMotorClient(str(MONGODB_URL),
-                                   username='myUserAdmin',
-                                   password='SkoleBole69',
-                                   maxPoolSize=MAX_CONNECTIONS_COUNT,
-                                   minPoolSize=MIN_CONNECTIONS_COUNT)
+    db.client = AsyncIOMotorClient(str(MONGODB_URL))
     logging.info("Connected！")
 
 
