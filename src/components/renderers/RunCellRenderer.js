@@ -22,7 +22,10 @@ export default {
             this.imgStat += "kwh.png"
         }
         else if (this.stat === "Total time") {
-            this.imgStat += "time.png"
+            this.imgStat += "clock.png"
+        }
+        else if (this.stat === "Reward") {
+          this.imgStat += "large_trophy.png"
         }
         else {
           return ""
