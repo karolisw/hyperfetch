@@ -28,6 +28,11 @@ have a look at the HyperFetch website.
    * 2.3 [Setup frontend](#start-up-frontend)
    * 2.4 [Installation frontend](#installation-frontend)
 
+## Prerequisites
+Box2D-py
+swig
+
+
 ## Links
 Repository: [HyperFetch Github](https://github.com/karolisw/hyperFetch)\
 Documentation: [HyperFetch Website](https://github.com/karolisw/hyperFetch/tree/frontend)
@@ -55,7 +60,9 @@ Activate virtualenv this way if using Linux/MacOS:
 
         $ source myvenv/bin/activate
 
-2. Install the pip-module!
+2. Install the pip-module. 
+
+        # pip install hyperfetch
    
          
 ## Example 1: tuning + posting using HyperFetch

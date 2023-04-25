@@ -21,3 +21,6 @@ class RunCreate(BaseModel):
     env: str = RunFields.env
     total_time: str = RunFields.total_time
     reward: float = RunFields.reward
+    sampler: str = RunFields.sampler
+    pruner: str = RunFields.pruner
+    n_trials: str = RunFields.n_trials

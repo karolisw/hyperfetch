@@ -56,3 +56,12 @@ class RunFields:
     reward = Field(
         description="The best reward accomplished by the agent when training in the environment"
     )
+    sampler = Field(
+        description="The sampler used for parameters sampling."
+    )
+    pruner = Field(
+        description="The pruner used to prune (terminate) trials early when performing under par. "
+    )
+    n_trials = Field(
+        description="The number of Optuna trials that was set in the config file."
+    )

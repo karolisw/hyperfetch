@@ -106,7 +106,7 @@ class Manager:
             # Free memory
             model.env.close()
             eval_env.close()
-        except (AssertionError, ValueError) as e:
+        except (AssertionError, ValueError, TypeError) as e:
             # Free memory
             model.env.close()
             eval_env.close()
@@ -261,7 +261,7 @@ class Manager:
             logger.info("If you are using HyperFetch with no correlation to a Git-proejct, "
                         "simply give the parameter an empty string as value. ")
 
-        if 'policy' not in data.keys() :
+        if 'policy' not in data.keys():
             logger.info('No policy was specified. Config value "policy" set to "MlpPolicy". '
                         'Policies available: "MlpPolicy", "CnnPolicy", "MultiInputPolicy"')
             data.update({'policy': 'MlpPolicy'})
@@ -678,6 +678,9 @@ class Manager:
                'git_link': self.git_link,
                'project_name': self.project_name,
                'total_time': duration,
+               'sampler': self.sampler,
+               'pruner': self.pruner,
+               'n_trials': self.n_trials,
                'reward': trial.value}
 
         print("Posting...")
@@ -703,6 +706,9 @@ class Manager:
                'alg': self.alg,
                'env': self.env,
                'git_link': self.git_link,
+               'sampler': self.sampler,
+               'pruner': self.pruner,
+               'n_trials': self.n_trials,
                'project_name': self.project_name}
 
         # Add energy consumed to run

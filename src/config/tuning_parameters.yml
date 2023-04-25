@@ -1,6 +1,6 @@
-alg: dqn
+alg: ppo
 bootstrap_count: 0
-env: pendulum
+env: Pendulum-v1
 eval_freq: 10000
 frame_stack: null
 git_link: github.com/karolisw/hyperFetch
@@ -27,7 +27,7 @@ n_jobs: 1
 n_min_trials: 1
 n_startup_trials: 5
 n_timesteps: 20000
-n_trials: 10
+n_trials: 1
 n_warmup_steps: 0
 patience: 50
 percentile: 25.0
