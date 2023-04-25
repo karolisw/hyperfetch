@@ -14,7 +14,7 @@ authors = [
 ]
 description = "HyperFetch. A tool to optimize and fetch hyperparameters for your reinforcement learning application."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9, <3.11.0"
 license = {file = "LICENSE"}
 keywords = ["reinforcement learning", "hyperparameters", "replication"]
 
