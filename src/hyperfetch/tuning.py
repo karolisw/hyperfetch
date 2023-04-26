@@ -113,4 +113,4 @@ def save_cli() -> None:
     asyncio.run(manager.save_custom(client=MONGODB_URL, db=MONGO_DB, collection=MONGO_COLLECTION))
 
 if __name__ == '__main__':
-    tune("tuning_parameters.yml")
+    tune("../tuning_parameters.yml")
