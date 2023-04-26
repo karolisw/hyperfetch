@@ -39,7 +39,7 @@ export default {
 </script>
 
 <template>  
-<div class="landing">
+<div class="landing" title="The landing page for users. Also called Home-page.">
   <section class="home">
     <div class="text container">
       <h2>Fetch Your Hyperparameters</h2>

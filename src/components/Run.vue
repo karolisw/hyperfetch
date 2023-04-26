@@ -103,6 +103,7 @@ export default {
       };
       
       let run = this.currentRun
+      this.statData.push({ param: "# trials", value: run.n_trials })
       this.statData.push({ param: "CPU model", value: run.cpu_model })
       this.statData.push({ param: "GPU model", value: run.gpu_model })
       this.statData.push({ param: "Project name", value: run.project_name })
