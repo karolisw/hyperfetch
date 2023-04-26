@@ -32,7 +32,7 @@ def tune(config_path: str) -> None:
     tracker.stop()
 
     # Post trial along with the tracking data unless user's config file states not to
-    if manager.post_run:
+    if manager.post_run and best_trial is not None:
         asyncio.run(manager.save_trial(
             trial=best_trial,
             client=MONGODB_URL,

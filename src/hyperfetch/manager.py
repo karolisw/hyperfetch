@@ -129,7 +129,7 @@ class Manager:
 
         return reward
 
-    def run(self) -> FrozenTrial:
+    def run(self) -> FrozenTrial | None:
 
         def check_threshold(study: optuna.study, trial):
             try:
@@ -164,33 +164,36 @@ class Manager:
 
         print("Number of finished trials: ", len(study.trials))
 
-        trial = study.best_trial
-        print("Best trial: ", trial)
+        try:
+            trial = study.best_trial
+            print("Best trial: ", trial)
+            print("Value: ", trial.value)
+            print("Params: ")
+            for key, value in trial.params.items():
+                print("    {}: {}".format(key, value))
 
-        print("Value: ", trial.value)
+            # Write report
+            report_name = (
+                f"report_{self.env}_{self.n_trials}-trials-{self.n_timesteps}"
+                f"-{self.sampler}-{self.pruner}_{int(time())}"
+            )
+            # This is where the report will be written to
+            log_path = os.path.join(self.log_folder, self.alg, report_name)
+            print("Writing report to %s", log_path)
+            self.logger.info("Writing report to %s", log_path)
 
-        print("Params: ")
-        for key, value in trial.params.items():
-            print("    {}: {}".format(key, value))
+            # Write report
+            os.makedirs(os.path.dirname(log_path), exist_ok=True)
+            study.trials_dataframe().to_csv(f"{log_path}.csv")
 
-        report_name = (
-            f"report_{self.env}_{self.n_trials}-trials-{self.n_timesteps}"
-            f"-{self.sampler}-{self.pruner}_{int(time())}"
-        )
-        # This is where the report will be written to
-        log_path = os.path.join(self.log_folder, self.alg, report_name)
-        print("Writing report to %s", log_path)
-        self.logger.info("Writing report to %s", log_path)
+            # Save the end time of the run
+            self.end_time = datetime.now()
+            # Return the best trial
+            return trial
 
-        # Write report
-        os.makedirs(os.path.dirname(log_path), exist_ok=True)
-        study.trials_dataframe().to_csv(f"{log_path}.csv")
-
-        # Save the end time of the run
-        self.end_time = datetime.now()
-
-        # Return the best trial
-        return trial
+        except ValueError:
+            print("Study was completed, but all trials were pruned. ")
+            return None
 
     def _create_logger(self, logger_name) -> None:
         """
