@@ -14,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-print("ALLOWED HOSTS: ", ALLOWED_HOSTS)
 app.add_event_handler("startup", connect_to_motor)
 app.add_event_handler("shutdown", close_motor_connection)
 
