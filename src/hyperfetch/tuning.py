@@ -1,18 +1,38 @@
 import argparse
-from .manager import Manager
+from manager import Manager
 from codecarbon import EmissionsTracker
+from codecarbon import OfflineEmissionsTracker
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-from .auth_connection import MONGODB_URL, MONGO_DB, MONGO_COLLECTION
+from auth_connection import MONGODB_URL, MONGO_DB, MONGO_COLLECTION
 
 client = AsyncIOMotorClient(MONGODB_URL)
 
 # Tracks emissions (writes to emissions.csv)
 tracker = EmissionsTracker()
+offline_tracker = OfflineEmissionsTracker(country_iso_code="DEU")
+
+
+def tune_offline(config_path: str) -> None:
+    offline_tracker.start()
+    manager = Manager(config_path=config_path)
+
+    # Best performing trial is returned as FrozenTrial
+    best_trial = manager.run()
+
+    offline_tracker.stop()
+
+    # Post trial along with the tracking data unless user's config file states not to
+    if manager.post_run:
+        asyncio.run(manager.save_trial(
+            trial=best_trial,
+            client=MONGODB_URL,
+            db=MONGO_DB,
+            collection=MONGO_COLLECTION
+        ))
 
 
 def tune(config_path: str) -> None:
-
     """
     Tune hyperparameters for alg/env combo specified in config path.
     This method is not for the command line, but for use inside scripts.
@@ -111,3 +131,8 @@ def save_cli() -> None:
     args = parser.parse_args()
     manager = Manager(config_path=args.config_path)
     asyncio.run(manager.save_custom(client=MONGODB_URL, db=MONGO_DB, collection=MONGO_COLLECTION))
+
+
+if __name__ == '__main__':
+    tune_offline("./tuning_parameters.yml")
+    tune("./tuning_parameters.yml")
