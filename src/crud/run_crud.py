@@ -1,4 +1,3 @@
-from src.hyperfetch.alg_samplers import SUPPORTED_ALGORITHMS
 from src.models.create_run import RunCreate
 from typing import List
 from src.config.mongodb import AsyncIOMotorClient
@@ -7,7 +6,13 @@ from src.models.receive_run import RunRead, EnvRead, RunsRead, EnvsRead
 from src.utils.db_utils import get_time, get_uuid
 from src.utils.exceptions import RunNotFoundException
 
-
+SUPPORTED_ALGORITHMS = [
+    "ppo",
+    "a2c",
+    "dqn",
+    "sac",
+    "td3"
+]
 async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:
     # From Object to dict
     document = new_run.dict()
