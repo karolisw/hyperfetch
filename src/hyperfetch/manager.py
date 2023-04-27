@@ -665,6 +665,12 @@ class Manager:
         cpu_model = last_row['cpu_model']
         gpu_model = last_row['gpu_model']
         emissions = last_row['emissions']
+        country = last_row['country_name']
+        region = last_row['region']
+        cloud_provider = last_row['cloud_provider']
+        cloud_region = last_row['cloud_region']
+        run_os = last_row['os']
+        python_version = last_row['python_version']
 
         run_id = get_uuid()
 
@@ -676,6 +682,12 @@ class Manager:
                'cpu_model': cpu_model,
                'gpu_model': gpu_model,
                'CO2_emissions': emissions,
+               'country': country,
+               'region': region,
+               'cloud_provider': cloud_provider,
+               'cloud_region': cloud_region,
+               'os': run_os,
+               'python_version': python_version,
                'alg': self.alg,
                'env': self.env,
                'git_link': self.git_link,
@@ -687,7 +699,6 @@ class Manager:
                'reward': trial.value}
 
         print("Posting...")
-
         await my_client[db][collection].insert_one(run)
         print("Posted!")
         print("\n\nTo filter-search for your run on the website, use the run ID:\n ", run_id + "\n")
