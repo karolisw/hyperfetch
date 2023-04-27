@@ -1,9 +1,9 @@
 import {createRouter, createWebHistory} from 'vue-router'
-import LandingPage from '../views/LandingPage.vue'
-import Overview from '../views/Overview.vue'
-import About from '../views/About.vue'
-import GetStarted from '../views/GetStarted.vue'
-import ConfigDocs from '../views/ConfigDocs.vue'
+import LandingPage from '@/views/LandingPage.vue'
+import Overview from '@/views/Overview.vue'
+import About from '@/views/About.vue'
+import GetStarted from '@/views/GetStarted.vue'
+import ConfigDocs from '@/views/ConfigDocs.vue'
 
 /** 
 path: the URL path where this route can be found.

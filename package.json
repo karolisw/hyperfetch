@@ -7,9 +7,9 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "engines" : { 
-    "npm" : ">=9.4.1 <9.5.0",
-    "node" : ">=18.14.0 <=18.16.0"
+  "engines": {
+    "npm": ">=9.4.1 <9.5.0",
+    "node": ">=18.14.0 <=18.16.0"
   },
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@mdi/font": "^7.2.96",
     "@types/prismjs": "^1.26.0",
-    "@vitejs/plugin-vue": "^4.0.0",
+    "@vitejs/plugin-vue": "^4.2.1",
     "material-design-icons-iconfont": "^6.7.0",
     "prismjs": "^1.29.0",
     "sass": "^1.60.0",

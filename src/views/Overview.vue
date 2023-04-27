@@ -1,8 +1,8 @@
 <script>
-import Algs from '../components/Algs.vue';
-import Runs from '../components/Runs.vue';
-import Run from '../components/Run.vue'
-import { fromFullToShort } from '../utils/mapping.js'
+import Algs from '@/components/Algs.vue';
+import Runs from '@/components/Runs.vue';
+import Run from '@/components/Run.vue'
+import { fromFullToShort } from '@/utils/mapping.js'
 
 export default {
     name: "Overview",

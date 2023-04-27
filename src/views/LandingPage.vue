@@ -1,5 +1,5 @@
 <script>
-import Overview from "./Overview.vue";
+import Overview from "@/views/Overview.vue";
 
 export default {
   name: "LandingPage",

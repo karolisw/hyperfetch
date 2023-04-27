@@ -168,8 +168,8 @@
 </template>
 
 <script>
-import LandingPage from './LandingPage.vue'
-import GetStarted from './GetStarted.vue'
+import LandingPage from '@/views/LandingPage.vue'
+import GetStarted from '@/views/GetStarted.vue'
 
 export default {
     name: "About",
