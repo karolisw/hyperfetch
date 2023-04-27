@@ -65,3 +65,21 @@ class RunFields:
     n_trials = Field(
         description="The number of Optuna trials that was set in the config file."
     )
+    country = Field(
+        description="The country that the hyperparameters were trained in."
+    )
+    region = Field(
+        description="The region of the country that the hyperparameters were trained in."
+    )
+    cloud_provider = Field(
+        description="The cloud provider that was used for training the moodel."
+    )
+    cloud_region = Field(
+        description="The region that the model was trained in (defined by the cloud provider)."
+    )
+    os = Field(
+        description="The OS that was used when training the model."
+    )
+    python_version = Field(
+        description="The Python version that was used when training the model."
+    )
