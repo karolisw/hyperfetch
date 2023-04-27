@@ -3,7 +3,7 @@ import axios from 'axios'
 /**
  * Variable to avoid rewriting
  */
-const api = 'https://sleepy-cove-00032.herokuapp.com/api'
+const ap1 = `${process.env.BACKEND}/api`
 
 
 export default {
