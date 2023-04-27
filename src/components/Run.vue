@@ -110,6 +110,12 @@ export default {
       this.statData.push({ param: "Git link", value: run.git_link })
       this.statData.push({ param: "Sampler", value: run.sampler })
       this.statData.push({ param: "Pruner", value: run.pruner })
+      this.statData.push({ param: "Country", value: run.country })
+      this.statData.push({ param: "Region", value: run.region })
+      this.statData.push({ param: "Cloud provider", value: run.cloud_provider })
+      this.statData.push({ param: "Cloud region", value: run.cloud_region })
+      this.statData.push({ param: "OS", value: run.os })
+      this.statData.push({ param: "Python version", value: run.python_version })
 
       // Separate table 
       this.rewardData.push({ param: "Reward", value: run.reward }) 
