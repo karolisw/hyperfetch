@@ -52,7 +52,6 @@ async def _list_runs_for_env(conn: AsyncIOMotorClient, env: str, alg: str) -> Ru
             return None
         return RunRead(**document)
 
-
 async def list_runs_for_env_alg(conn: AsyncIOMotorClient, env: str, alg: str, limit: int) -> RunsRead:
     runs: List[RunRead] = []
     rows = await conn[database_name][run_collection_name]\
