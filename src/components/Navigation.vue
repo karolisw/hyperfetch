@@ -25,15 +25,7 @@
   
 <script>
   export default {
-    name: "Navbar",
-    data() {
-        return {
-            scrolledNav: null,
-            mobile: null,
-            mobileNav: null,
-            windowWidth: null,
-        }
-    },
+    name: "Navigation",
     created() {
         // Listening for screen size change
         window.addEventListener('resize', this.checkScreen);
@@ -43,6 +35,14 @@
     },
     mounted() {
         window.addEventListener('scroll', this.updateScroll);
+    },
+    data() {
+        return {
+            scrolledNav: null,
+            mobile: null,
+            mobileNav: null,
+            windowWidth: null,
+        }
     },
     methods: {
         toggleMobileNav() {

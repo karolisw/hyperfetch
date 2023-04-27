@@ -1,10 +1,10 @@
 <script>
-import Navbar from '@/components/Navbar.vue';
+import Navigation from '@/components/Navigation.vue'
   
   export default {
     name: 'App',
     components: {
-      Navbar,
+      Navigation,
     },
     data() {
       return {
@@ -16,7 +16,7 @@ import Navbar from '@/components/Navbar.vue';
 <template>
   <v-app>
     <div class="app" >
-    <Navbar></Navbar>
+    <Navigation></Navigation>
     <router-view v-slot="{ Component }">
       <transition name="scale-slide" mode="out-in">
         <component :is="Component"></component>
