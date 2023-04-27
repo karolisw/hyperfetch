@@ -7,6 +7,10 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "engines" : { 
+    "npm" : ">=9.4.1 <10.0.0",
+    "node" : ">=18.14.0 <19.0.0"
+  },
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/js": "^7.2.96",
