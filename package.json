@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "npm run serve"
   },
   "engines": {
     "npm": ">=9.4.1 <9.5.0",
@@ -23,6 +24,7 @@
     "ag-grid-vue3": "^29.2.0",
     "axios": "^1.3.4",
     "bootstrap": "^4.6.2",
+    "dotenv": "^16.0.3",
     "vite-plugin-vuetify": "^1.0.2",
     "vue": "^3.2.41",
     "vue-router": "^4.1.6",
