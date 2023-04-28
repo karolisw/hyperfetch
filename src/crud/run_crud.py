@@ -40,7 +40,7 @@ async def list_best_runs_for_env(conn: AsyncIOMotorClient, env: str) -> RunsRead
     return runs
 
 
-async def _list_runs_for_env(conn: AsyncIOMotorClient, env: str, alg: str) -> RunRead | None:
+async def _list_runs_for_env(conn: AsyncIOMotorClient, env: str, alg: str) -> RunRead:
     # A for loop that queries for each alg
     cursor = conn[database_name][run_collection_name] \
         .find({"env": env, "alg": alg}) \
@@ -48,8 +48,6 @@ async def _list_runs_for_env(conn: AsyncIOMotorClient, env: str, alg: str) -> Ru
         .limit(1)
 
     for document in await cursor.to_list(length=1):
-        if document is None:
-            return None
         return RunRead(**document)
 
 async def list_runs_for_env_alg(conn: AsyncIOMotorClient, env: str, alg: str, limit: int) -> RunsRead:
