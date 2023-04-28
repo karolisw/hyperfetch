@@ -1,3 +1,4 @@
+import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from src.routes.run_route import router
@@ -17,5 +18,13 @@ app.add_middleware(
 app.add_event_handler("startup", connect_to_motor)
 app.add_event_handler("shutdown", close_motor_connection)
 
-
 app.include_router(router)
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
