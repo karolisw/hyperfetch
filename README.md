@@ -28,10 +28,6 @@ have a look at the HyperFetch website.
    * 2.3 [Setup frontend](#start-up-frontend)
    * 2.4 [Installation frontend](#installation-frontend)
 
-## Prerequisites
-Box2D-py
-swig
-
 
 ## Links
 Repository: [HyperFetch Github](https://github.com/karolisw/hyperFetch)\
