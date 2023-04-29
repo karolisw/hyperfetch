@@ -1,7 +1,7 @@
 from src.models.create_run import RunCreate
 from typing import List
 from src.config.mongodb import AsyncIOMotorClient
-from src.config.auth_connection import database_name, run_collection_name
+from src.config.auth_connection import MONGO_DB, MONGO_COLLECTION
 from src.models.receive_run import RunRead, EnvRead, RunsRead, EnvsRead
 from src.utils.db_utils import get_time, get_uuid
 from src.utils.exceptions import RunNotFoundException
@@ -18,7 +18,7 @@ async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:
     document = new_run.dict()
     document["_id"] = get_uuid()
     document["created"] = get_time()
-    result = await conn[database_name][run_collection_name].insert_one(document)
+    result = await conn[MONGO_DB][MONGO_COLLECTION].insert_one(document)
     assert result.acknowledged
 
     run = await show_run(conn=conn, run_id=result.inserted_id)
@@ -26,7 +26,7 @@ async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:
 
 
 async def list_envs(conn: AsyncIOMotorClient) -> EnvsRead:
-    cursor = await conn[database_name][run_collection_name].find().distinct('env')
+    cursor = await conn[MONGO_DB][MONGO_COLLECTION].find().distinct('env')
     return [EnvRead(env=document) for document in cursor]
 
 
@@ -42,7 +42,7 @@ async def list_best_runs_for_env(conn: AsyncIOMotorClient, env: str) -> RunsRead
 
 async def _list_runs_for_env(conn: AsyncIOMotorClient, env: str, alg: str) -> RunRead:
     # A for loop that queries for each alg
-    cursor = conn[database_name][run_collection_name] \
+    cursor = conn[MONGO_DB][MONGO_COLLECTION] \
         .find({"env": env, "alg": alg}) \
         .sort("reward", -1) \
         .limit(1)
@@ -52,7 +52,7 @@ async def _list_runs_for_env(conn: AsyncIOMotorClient, env: str, alg: str) -> Ru
 
 async def list_runs_for_env_alg(conn: AsyncIOMotorClient, env: str, alg: str, limit: int) -> RunsRead:
     runs: List[RunRead] = []
-    rows = await conn[database_name][run_collection_name]\
+    rows = await conn[MONGO_DB][MONGO_COLLECTION]\
         .find({'env': env, 'alg': alg})\
         .sort("reward", -1)\
         .limit(limit).to_list(length=limit)
@@ -63,7 +63,7 @@ async def list_runs_for_env_alg(conn: AsyncIOMotorClient, env: str, alg: str, li
 
 
 async def show_run(conn: AsyncIOMotorClient, run_id: str) -> RunRead:
-    document = await conn[database_name][run_collection_name].find_one({"_id": run_id})
+    document = await conn[MONGO_DB][MONGO_COLLECTION].find_one({"_id": run_id})
     if not document:
         raise RunNotFoundException(run_id)
 
