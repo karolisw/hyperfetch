@@ -9,7 +9,7 @@ from src.config.mongodb import db
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
-
+from pymongo.server_api import ServerApi
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -20,7 +20,8 @@ def create_aliased_response(model: BaseModel) -> JSONResponse:
 
 async def connect_to_motor() -> None:
     logger.info("Connecting to mongoDB...")
-    db.client = AsyncIOMotorClient(str(MONGODB_URL))
+    logger.info("Mongo url: ", MONGODB_URL)
+    db.client = AsyncIOMotorClient(str(MONGODB_URL), server_api=ServerApi('1'))
     logging.info("Connected！")
 
 
