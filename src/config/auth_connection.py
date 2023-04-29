@@ -11,9 +11,9 @@ MIN_CONNECTIONS_COUNT = int(os.getenv("MIN_CONNECTIONS_COUNT", 10))
 
 ALLOWED_HOSTS = CommaSeparatedStrings(os.getenv("ALLOWED_HOSTS", "*"))
 
-MONGODB_URL = os.environ.get('MONGODB_URL')
-MONGO_DB = os.environ.get("MONGO_DB")
-MONGO_COLLECTION = os.environ.get("MONGO_COLLECTION")
+MONGODB_URL = os.getenv('MONGODB_URL')
+MONGO_DB = os.getenv("MONGO_DB")
+MONGO_COLLECTION = os.getenv("MONGO_COLLECTION")
 
 database_name = MONGO_DB
 run_collection_name = MONGO_COLLECTION
