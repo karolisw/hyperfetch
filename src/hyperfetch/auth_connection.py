@@ -11,7 +11,7 @@ MIN_CONNECTIONS_COUNT = int(os.getenv("MIN_CONNECTIONS_COUNT", 10))
 
 ALLOWED_HOSTS = CommaSeparatedStrings(os.getenv("ALLOWED_HOSTS", "*"))
 
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb+srv://admin:adminKaroline12@hyperfetch.qwivycp.mongodb.net/test")
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb+srv://admin:adminKaroline12@hyperfetch.zxjvuqd.mongodb.net/test")
 MONGO_DB = os.getenv("MONGO_DB", "hyperfetch")
 MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "runs")
 
