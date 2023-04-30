@@ -5,6 +5,7 @@ from src.config.auth_connection import MONGO_DB, MONGO_COLLECTION
 from src.models.receive_run import RunRead, EnvRead, RunsRead, EnvsRead
 from src.utils.db_utils import get_time, get_uuid
 from src.utils.exceptions import RunNotFoundException
+import logging
 
 SUPPORTED_ALGORITHMS = [
     "ppo",
@@ -26,6 +27,7 @@ async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:
 
 
 async def list_envs(conn: AsyncIOMotorClient) -> EnvsRead:
+    logging.info("trying to list envs")
     cursor = await conn[MONGO_DB][MONGO_COLLECTION].find().distinct('env')
     return [EnvRead(env=document) for document in cursor]
 
