@@ -3,7 +3,7 @@ import axios from 'axios'
 /**
  * Variable to avoid rewriting
  */
-const ap1 = `${process.env.BACKEND}/api`
+const api = `${process.env.BACKEND}/api`
 
 
 export default {
