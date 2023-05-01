@@ -4,6 +4,7 @@ import axios from 'axios'
  * Variable to avoid rewriting
 */
 const api = process.env.BACKEND
+const api2 = `${process.env.BACKEND}`
 
 export default {
 
@@ -14,6 +15,8 @@ export default {
    */
   async fetchEnvironments() {
     console.log("api is: ", api)
+    console.log("api2 is: ", api2)
+
     return await axios.get(api)
   },
 
