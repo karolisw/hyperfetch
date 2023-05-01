@@ -1,26 +1,33 @@
-# Use an official Node runtime as a parent image
-FROM node:18
+# build stage
+FROM node:18 as build-stage
 
 # Set the working directory to /frontend
 WORKDIR /frontend
 
 COPY package*.json ./
 
-# Install the 'serve' package
-RUN npm install -g serve
+# Install dependencies
+RUN npm install
 
 # Copy the current directory contents into the container at /frontend
 COPY . .
 
-# Install dependencies
-RUN npm install
-
-
 # Build the app
 RUN npm run build
 
+# production stage
+FROM nginx:stable-alpine as production-stage
+
+# Copy over the built files from dist into nginx server
+COPY --from=build-stage /frontend/dist /usr/share/nginx/html
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf 
+
 # Expose port 3000 to the outside world
-EXPOSE 3000
+EXPOSE 80
+
+# URL to the backend 
+#ENV BACKEND="hyperfetch-backend.azurewebsites.net/api/"
 
 # Start the app
-CMD [ "npm", "run", "start" ]
+CMD ["nginx", "-g", "daemon off;"]
