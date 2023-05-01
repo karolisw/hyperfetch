@@ -13,6 +13,7 @@ export default {
    * @returns 
    */
   async fetchEnvironments() {
+    console.log("api is: ", api)
     return await axios.get(api)
   },
 
