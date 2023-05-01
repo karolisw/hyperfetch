@@ -6,7 +6,7 @@
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "serve -s dist"
   },
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
