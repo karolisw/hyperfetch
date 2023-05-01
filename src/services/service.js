@@ -3,7 +3,7 @@ import axios from 'axios'
 /**
  * Variable to avoid rewriting
 */
-const api = process.env.BACKEND
+const api = "https://hyperfetch-backend.azurewebsites.net/api/" //process.env.BACKEND
 const api2 = `${process.env.BACKEND}`
 
 export default {
