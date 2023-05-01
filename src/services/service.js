@@ -13,7 +13,7 @@ export default {
    * @returns 
    */
   async fetchEnvironments() {
-    return await axios.get("/api/")
+    return await axios.get(api)
   },
 
   /**
@@ -23,7 +23,7 @@ export default {
    * @returns All found run-documents with their algorithm
    */
   async fetchAlgs (env) {
-    return await axios.get("/api/env_top_trials/?env=" + env)
+    return await axios.get(api + "env_top_trials/?env=" + env)
   },
 
   /**
@@ -36,7 +36,7 @@ export default {
    */
   async fetchBestRuns (env, alg, limit) {
     return await axios
-      .get("/api/alg_top_trials/" + "?env=" + env + "&alg=" + alg + "&limit=" + limit)
+      .get(api + "alg_top_trials/" + "?env=" + env + "&alg=" + alg + "&limit=" + limit)
   },
   
   /**
@@ -47,6 +47,6 @@ export default {
    */
   async fetchRun(run_id) {
     return await axios
-      .get("/api/runs/" + run_id) 
+      .get(api + "runs/" + run_id) 
   },
 }
