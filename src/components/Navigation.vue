@@ -2,7 +2,7 @@
     <header :class="{ 'scrolled-nav': scrolledNav }">
         <nav>
             <div class="branding">
-                <router-link :to="{name: 'Home'}"><img src="../assets/hf_logo.png" alt="HyperFetch logo"></router-link>
+                <router-link :to="{name: 'Home'}"><img src="/assets/hf_logo.png" alt="HyperFetch logo"></router-link>
             </div>
             <ul v-show="!mobile" class="navigation">
                 <li><router-link class="link" :to="{name: 'GetStarted'}">Get started</router-link></li>
