@@ -13,7 +13,7 @@ export default {
       },
       setStat(params) {
         this.stat = params.data.param;
-        this.imgStat = "../assets/"
+        this.imgStat = "/"
         
         if (this.stat === "CO2 emissions") {
             this.imgStat += "co2.png"
