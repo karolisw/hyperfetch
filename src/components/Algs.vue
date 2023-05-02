@@ -4,7 +4,7 @@ import "ag-grid-community/styles//ag-grid.css";
 import "ag-grid-community/styles//ag-theme-alpine.css";
 
 import { fromShortToFull } from "@/utils/mapping.js";
-import AlgCellRenderer from "@/components/renderers/AlgCellRenderer.js";
+import AlgCellRenderer from "@/components/AlgCellRenderer.js";
 
 export default {
   name: "Algs",

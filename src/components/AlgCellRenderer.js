@@ -13,7 +13,7 @@ export default {
       },
       setAlg(params) {
         this.alg = params.data.full;
-        this.imgForAlg = ".../assets/renderer/alg/"
+        this.imgForAlg = "../assets/renderer/alg/"
         
         if (this.alg === "Proximal Policy Optimization") {
             this.imgForAlg += "ppo.png"
