@@ -8,9 +8,7 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - frontend
-      
-env:
-  BACKEND: "https://hyperfetch-backend.azurewebsites.net/api/"
+
 
 jobs:
   build_and_deploy_job:
@@ -33,8 +31,6 @@ jobs:
           app_location: "/" # App source code path
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
-        env:
-          BACKEND: https://hyperfetch-backend.azurewebsites.net/api/
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
