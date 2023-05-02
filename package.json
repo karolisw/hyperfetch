@@ -3,14 +3,10 @@
   "private": false,
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "npm run serve"
-  },
-  "engines": {
-    "npm": ">=9.4.1 <9.5.0",
-    "node": ">=18.14.0 <=18.16.0"
+    "start": "serve -s dist"
   },
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",

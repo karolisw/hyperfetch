@@ -84,6 +84,7 @@ export default createStore({
             })
         } catch (error) {
             console.log('Could not get envs from db with error: ' + error)
+            console.log("Response value: ", response)
         }
     },
 
