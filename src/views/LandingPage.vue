@@ -18,10 +18,8 @@ export default {
 
   methods: {
     async onSelectEnvironment(value) { 
-      console.log("the value is: ", value)
       this.selectedEnvironment = value
       // get algs for selected environment and set selected env as current enc
-      console.log("selected environment is: ", this.selectedEnvironment)
       await this.$store.dispatch('getAlgorithmsForEnv', {selected_env: this.selectedEnvironment.trim()});
       
       if (this.$store.getters.GET_ALGS.length > 0) {

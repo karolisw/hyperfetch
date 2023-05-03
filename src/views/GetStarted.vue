@@ -185,8 +185,8 @@
             </v-col>
         </v-row>
 
-        <v-row>
-            <v-col class="box dark-bg" cols="12">
+        <v-row class="box dark-bg">
+            <v-col cols="12">
                 <h3>5. Enjoy your new hyperparameters!</h3>
             </v-col>
         </v-row>      
