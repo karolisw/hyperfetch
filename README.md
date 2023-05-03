@@ -1,7 +1,7 @@
 # HyperFetch
 #### HyperFetch is a tool consisting of:
-- [Website](https://github.com/karolisw/hyperFetch) for fetching hyperparameters that are tuned by others
-- Pip-module for tuning hyperparameters 
+- A [website](https://white-rock-097162f03.3.azurestaticapps.net/) for fetching hyperparameters that are tuned by others
+- This pip-module for tuning and saving hyperparameters yourself 
 
 #### The intention of HyperFetch is to:
 - Make recreation of existing projects easier within the 
@@ -10,13 +10,11 @@
   learning models easier due to abstracting away the advanced tuning-step.
 
 #### The tool is expected to aid in decreasing CO2-emissions related to tuning hyperparameters when training RL models. 
-This is expected to be done by posting tuned algorithm x environment combinations to the websitesuch that:
-- Developers/Students can access hyperparameters that have been optimially tuned before instead of having to tune them themselves.
+By posting tuned [algorithm x environment] combinations to the website it is expected that:
+- Developers/Students can access hyperparameters that have already been optimially tuned instead of having to tune them themselves.
 - Researchers can filter by project on the website and access hyperparameters they wish to recreate/replicate for their own research.
+- Transparancy related to emissions will become more mainstream within the field.
 
-The persistance endpoints opens up to the user through this package.
-To access/fetch hyperparameters optimized by other RL-practicioners, 
-have a look at the HyperFetch website.
 
 ## Content
 * [Links](#links)
@@ -35,11 +33,11 @@ swig
 
 ## Links
 Repository: [HyperFetch Github](https://github.com/karolisw/hyperFetch)\
-Documentation: [HyperFetch Website](https://github.com/karolisw/hyperFetch/tree/frontend)
+Documentation: [Configuration docs](https://white-rock-097162f03.3.azurestaticapps.net/configDocs)
 
 ## Using the pip module
 To use the pip model please do the following:
-1. Create a virtual environment in your favorite IDE. The virtual environment must be of the type virtualenv.
+1. Create a virtual environment in your favorite IDE. 
 
 Install virtualenv if you haven't 
 
