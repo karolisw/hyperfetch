@@ -2,6 +2,7 @@
 #### HyperFetch is a tool consisting of:
 - A [website](https://white-rock-097162f03.3.azurestaticapps.net/) for fetching hyperparameters that are tuned by others
 - This pip-module for tuning and saving hyperparameters yourself 
+- NB: Only compatible with Linux distributions. Might be compatible with MacOS, but not yet tested.
 
 #### The intention of HyperFetch is to:
 - Make recreation of existing projects easier within the 
@@ -38,17 +39,10 @@ To use the pip model please do the following:
    Create a virtual environment
    
            virtualenv [some_name]
+
+   Activate virtualenv this way (Linux/MacOS):
    
-   Activate virtualenv this way if using windows:
-   
-          # In cmd.exe
-          venv\Scripts\activate.bat
-          # In PowerShell
-          venv\Scripts\Activate.ps1
-   
-   Activate virtualenv this way if using Linux/MacOS:
-   
-           $ source myvenv/bin/activate
+            source myvenv/bin/activate
 2. Install the pip-module. 
 
         pip install hyperfetch
