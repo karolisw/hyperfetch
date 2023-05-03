@@ -11,7 +11,7 @@
   learning models easier due to abstracting away the advanced tuning-step.
 
 #### The tool is expected to aid in decreasing CO2-emissions related to tuning hyperparameters when training RL models. 
-By posting tuned [algorithm x environment] combinations to the website it is expected that:
+By posting tuned [algorithm x environment] combinations to the website it's expected that:
 - Developers/Students can access hyperparameters that have already been optimially tuned instead of having to tune them themselves.
 - Researchers can filter by project on the website and access hyperparameters they wish to recreate/replicate for their own research.
 - Transparancy related to emissions will become more mainstream within the field.
