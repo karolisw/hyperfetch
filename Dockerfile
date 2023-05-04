@@ -20,7 +20,7 @@ RUN pip install -r requirements.txt
 EXPOSE 443
 
 # Define environment variable
-ENV ALLOWED_HOSTS="https://white-rock-097162f03.3.azurestaticapps.net","https://hyperfetch.online","http://hyperfetch.online"
+ENV ALLOWED_HOSTS="https://hyperfetch.online"
 ENV MONGODB_URL=""
 ENV MONGO_DB=""
 ENV MONGO_COLLECTION=""
