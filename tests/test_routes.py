@@ -2,12 +2,10 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.testclient import TestClient
 from motor.motor_asyncio import AsyncIOMotorClient
 
-import main
 from main import app
 from src.config.auth_connection import MONGODB_URL
 from src.config.mongodb import db
 from src.models.create_run import RunCreate
-from src.models.receive_run import RunRead
 
 # create a TestClient instance
 client = TestClient(app)
@@ -21,9 +19,10 @@ def connect():
 def test_fetch_envs():
     connect()
     response = client.get("/api/")
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.json() == [{'env': 'Acrobot-v1'},
                                {'env': 'CartPole-v1'},
+                               {'env': 'LunarLander-v2'},
                                {'env': 'MountainCar-v0'},
                                {'env': 'MountainCarContinuous-v0'},
                                {'env': 'Pendulum-v1'}]
@@ -61,7 +60,7 @@ def test_create_run():
         "cloud_region": "",
         "os":"Windows 11",
         "python_version": "3.10.9",
-        "reward": 18.5
+        "reward": 22.5
     }
 
     # Make the payload valid by turning it into a Pydantic model
@@ -80,19 +79,19 @@ def test_fetch_runs_for_env():
 
 def test_fetch_runs_for_env_alg():
     connect()
-    response = client.get("/api/alg_top_trials", params={"env": "my_env", "alg": "my_alg", "limit": 10})
+    response = client.get("/api/alg_top_trials", params={"env": "Pendulum-v1", "alg": "ppo", "limit": 10})
     assert response.status_code == 200
-    assert response.json() == {...}  # replace {...} with the expected JSON response
+    assert len(response.json()) == 10
 
 
 def test_fetch_run():
     connect()
     # make a GET request to the endpoint with a valid run ID
-    response = client.get("/api/runs/valid_run_id")
+    response = client.get("/api/runs/5d85547a-9386-49f6-9e4b-aaed8375fb5e")
 
     # assert that the response has a status code of 200 (OK)
     assert response.status_code == 200
 
     # assert that the response contains the expected data
-    expected_data = {"id": "valid_run_id", "name": "Run Name", "status": "completed"}
-    assert response.json() == expected_data
+    assert response.json()["run_id"] == "5d85547a-9386-49f6-9e4b-aaed8375fb5e"
+    assert response.json()["project_name"] == "MountainCarContinuous-v0_halving_cmaes"
