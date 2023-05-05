@@ -13,7 +13,7 @@ class RunCreate(BaseModel):
     Body of Run POST request, but in reality it functions as a base class,
     as other Pydantic classes inherit from this class.
     """
-    trial: Dict[str, Union[str, float]] = RunFields.trial
+    trial: Dict[str, Union[str, float, None]] = RunFields.trial
     project_name: str = RunFields.project_name
     git_link: str = RunFields.git_link
     energy_consumed: float = RunFields.energy_consumed
