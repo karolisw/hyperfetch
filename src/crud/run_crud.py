@@ -1,3 +1,4 @@
+from starlette.status import HTTP_204_NO_CONTENT
 from src.models.create_run import RunCreate
 from typing import List
 from src.config.mongodb import AsyncIOMotorClient
@@ -13,6 +14,8 @@ SUPPORTED_ALGORITHMS = [
     "sac",
     "td3"
 ]
+
+
 async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:
     # From Object to dict
     document = new_run.dict()
@@ -50,11 +53,12 @@ async def _list_runs_for_env(conn: AsyncIOMotorClient, env: str, alg: str) -> Ru
     for document in await cursor.to_list(length=1):
         return RunRead(**document)
 
+
 async def list_runs_for_env_alg(conn: AsyncIOMotorClient, env: str, alg: str, limit: int) -> RunsRead:
     runs: List[RunRead] = []
-    rows = await conn[MONGO_DB][MONGO_COLLECTION]\
-        .find({'env': env, 'alg': alg})\
-        .sort("reward", -1)\
+    rows = await conn[MONGO_DB][MONGO_COLLECTION] \
+        .find({'env': env, 'alg': alg}) \
+        .sort("reward", -1) \
         .limit(limit).to_list(length=limit)
     for row in rows:
         runs.append(RunRead(**row))
@@ -68,3 +72,12 @@ async def show_run(conn: AsyncIOMotorClient, run_id: str) -> RunRead:
         raise RunNotFoundException(run_id)
 
     return RunRead(**document)
+
+
+async def delete_run(conn: AsyncIOMotorClient, run_id: str) -> HTTP_204_NO_CONTENT:
+    deleted_run = await conn[MONGO_DB][MONGO_COLLECTION].delete_one({"_id": run_id})
+
+    if deleted_run.deleted_count == 0:
+        raise RunNotFoundException(run_id)
+
+    return HTTP_204_NO_CONTENT

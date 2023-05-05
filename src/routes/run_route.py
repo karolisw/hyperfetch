@@ -1,22 +1,18 @@
 # type: ignore
-from fastapi import Depends #, APIRouter
-from starlette.status import HTTP_201_CREATED
-
+from fastapi import Depends
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED
 from src.config.mongodb import get_database
-
 from src.crud.run_crud import *
 from src.models.receive_run import EnvsRead, RunsRead
 from src.utils.exceptions import RunAlreadyExistsException, get_exception_responses, RunNotFoundException
-
 from typing import Any, Callable
-
 from fastapi import APIRouter as FastAPIRouter
 from fastapi.types import DecoratedCallable
 
 
 class APIRouter(FastAPIRouter):
     def api_route(
-        self, path: str, *, include_in_schema: bool = True, **kwargs: Any
+            self, path: str, *, include_in_schema: bool = True, **kwargs: Any
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         if path.endswith("/"):
             path = path[:-1]
@@ -37,9 +33,8 @@ class APIRouter(FastAPIRouter):
         return decorator
 
 
-# prefix: start of every decorator provided by fastapi in this particular page
 # tags: the functionality of this category
-router = APIRouter(tags=['crud/rest']) #todo removed prefix
+router = APIRouter(tags=['crud/rest'])
 
 
 @router.get("/api/", response_description="List of all unique envs in db",
@@ -73,8 +68,18 @@ async def fetch_runs_for_env_alg(env: str, alg: str, limit: int, db: AsyncIOMoto
 
 @router.get("/api/runs/{run_id}", response_description="Get a single run",
             response_model=RunRead,
-            description="Get a single run by its unique ID",
             responses=get_exception_responses(RunNotFoundException))
 async def fetch_run(run_id: str, db: AsyncIOMotorClient = Depends(get_database)) -> RunRead:
     run = await show_run(conn=db, run_id=run_id)
     return run
+
+
+@router.delete("/api/delete/{run_id}", response_description="Delete a single run by its unique ID",
+               response_model=None, status_code=HTTP_204_NO_CONTENT,
+               responses=get_exception_responses(RunNotFoundException))
+async def remove_run(run_id: str, db: AsyncIOMotorClient = Depends(get_database)) -> HTTP_204_NO_CONTENT:
+    deleted_run = await delete_run(conn=db, run_id=run_id)
+    if deleted_run.deleted_count == 1:
+        return HTTP_204_NO_CONTENT
+    else:
+        return HTTP_404_NOT_FOUND
