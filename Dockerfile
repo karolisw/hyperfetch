@@ -9,9 +9,6 @@ COPY ./src /backend/src
 COPY main.py /backend
 COPY requirements.txt /backend
 COPY .gitignore /backend/.gitignore
-COPY LICENSE /backend
-COPY README.md /backend
-
 
 # Install the required packages
 RUN pip install -r requirements.txt
