@@ -3,7 +3,7 @@
 *__pycache__
 venv
 .mypy_cache
-src/tests/.pytest_cache
+tests/.pytest_cache
 src/hyperfetch/logs
 *.xml
 main.py
