@@ -10,6 +10,8 @@ from src.models.create_run import RunCreate
 # create a TestClient instance
 client = TestClient(app)
 
+run_id = ""
+
 
 # Connect to db
 def connect():
@@ -58,7 +60,7 @@ def test_create_run():
         "region": "Trønderlag",
         "cloud_provider": "",
         "cloud_region": "",
-        "os":"Windows 11",
+        "os": "Windows 11",
         "python_version": "3.10.9",
         "reward": 22.5
     }
@@ -68,6 +70,13 @@ def test_create_run():
 
     response = client.post("/api/create", json=serialized_payload)
     assert response.status_code == 201
+
+    response_json = response.json()
+
+    # Fetch the run id
+    id_found = response_json["run_id"]
+    assert id_found != 0
+
 
 def test_fetch_runs_for_env():
     connect()
