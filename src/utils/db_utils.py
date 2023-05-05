@@ -4,7 +4,7 @@ from typing import Union
 from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorClient
-from src.config.auth_connection import MONGODB_URL, MAX_CONNECTIONS_COUNT, MIN_CONNECTIONS_COUNT
+from src.config.auth_connection import MONGODB_URL
 from src.config.mongodb import db
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -20,8 +20,7 @@ def create_aliased_response(model: BaseModel) -> JSONResponse:
 
 async def connect_to_motor() -> None:
     logger.info("Connecting to mongoDB...")
-    logger.info("Mongo url: ", MONGODB_URL)
-    db.client = AsyncIOMotorClient(str(MONGODB_URL), server_api=ServerApi('1'))
+    db.client = AsyncIOMotorClient(str(MONGODB_URL))
     logging.info("Connected！")
 
 

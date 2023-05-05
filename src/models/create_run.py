@@ -9,8 +9,12 @@ __all__ = ("RunCreate",)
 
 
 class RunCreate(BaseModel):
-    """Body of Run POST request"""
-    trial: Dict[str, Union[str, float]] = RunFields.trial
+    """
+    Body of Run POST request, but in reality it functions as a base class,
+    as other Pydantic classes inherit from this class.
+    """
+    # Dict values for trial can hold str, float and None values
+    trial: Dict[str, Union[str, float, None]] = RunFields.trial 
     project_name: str = RunFields.project_name
     git_link: str = RunFields.git_link
     energy_consumed: float = RunFields.energy_consumed
@@ -24,3 +28,9 @@ class RunCreate(BaseModel):
     sampler: str = RunFields.sampler
     pruner: str = RunFields.pruner
     n_trials: str = RunFields.n_trials
+    country: str = RunFields.country
+    region: str = RunFields.region
+    cloud_provider: str = RunFields.cloud_provider
+    cloud_region: str = RunFields.cloud_region
+    os: str = RunFields.os
+    python_version: str = RunFields.python_version
