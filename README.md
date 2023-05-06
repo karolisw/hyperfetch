@@ -62,7 +62,7 @@ Activate virtualenv this way if using Linux/MacOS:
    
          
 ## Example 1: tuning + posting using HyperFetch
-Here is a quick example of how to tune and run PPO in the LunarLander-v2 environment inside your new or existing project:
+Here is a quick example of how to tune and run PPO in the Pendulum-v1 environment inside your new or existing project:
 
 ### Just a reminder:
 The pip package must be installed before this can be done.
@@ -75,7 +75,7 @@ For details, see [using the pip module](#using-the-pip-module).
 ```yaml
 # Required (example values)
 alg: ppo
-env: LunarLander-v2
+env: Pendulum-v1
 project_name: some_project
 git_link: github.com/user/some_project
 
@@ -119,7 +119,7 @@ For details, see [using the pip module](#using-the-pip-module).
 ```yaml
 # Required (example values)
 alg: dqn
-env: LunarLander-v2
+env: Pendulum-v1
 project_name: some_project
 git_link: github.com/user/some_project
 hyperparameters: # These depend on the choice of algorithm
