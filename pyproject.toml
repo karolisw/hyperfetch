@@ -33,6 +33,7 @@ dependencies = [
       'python-benedict==0.30.0',
       'codecarbon==2.1.4',
       'torch>=1.13.1',
+      'box2d-py==2.3.8',
       'gym==0.21.0',
       'pandas==2.0.1',
       'PyYAML==6.0',
