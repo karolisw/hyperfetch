@@ -44,6 +44,7 @@ async def fetch_envs(db: AsyncIOMotorClient = Depends(get_database)):
     return envs
 
 
+# Not in use and must be commented out if the project should be made public.
 @router.post("/api/create", response_description="Creates a run and returns its RunRead object",
              response_model=RunRead, status_code=HTTP_201_CREATED,
              responses=get_exception_responses(RunAlreadyExistsException), )
@@ -73,7 +74,7 @@ async def fetch_run(run_id: str, db: AsyncIOMotorClient = Depends(get_database))
     run = await show_run(conn=db, run_id=run_id)
     return run
 
-
+# Not in use and must be commented out if the project should be made public.
 @router.delete("/api/delete/{run_id}", response_description="Delete a single run by its unique ID",
                response_model=None, status_code=HTTP_204_NO_CONTENT,
                responses=get_exception_responses(RunNotFoundException))
