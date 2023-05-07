@@ -25,8 +25,10 @@ By posting tuned [algorithm x environment] combinations to the website it's expe
 
 ## Links
 Repository: [HyperFetch Github](https://github.com/karolisw/hyperFetch)\
-Documentation: [Configuration docs](https://white-rock-097162f03.3.azurestaticapps.net/configDocs)\
+How to use config file: [Configuration docs](https://white-rock-097162f03.3.azurestaticapps.net/configDocs)\
 Website: [hyperfetch.online](https://white-rock-097162f03.3.azurestaticapps.net/)
+API documentation: https://hyperfetch-backend.azurewebsites.net/docs
+
 ## Using the pip module
 To use the pip model please do the following:
 
