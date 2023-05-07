@@ -143,13 +143,9 @@ class Manager:
         # Set pytorch num threads to 1 for faster training.
         torch.set_num_threads(1)
 
-        # Using config args, the sampler and pruner is selected
         # Select sampler and pruner and assign to self
         sampler = self._select_sampler()
         pruner = self._select_pruner()
-
-        # Do not prune before 1/3 of the max budget is used.
-        # pruner = MedianPruner(n_startup_trials=N_STARTUP_TRIALS, n_warmup_steps=N_EVALUATIONS // 3)
 
         study = optuna.create_study(sampler=sampler, pruner=pruner, study_name=self.project_name,
                                     direction="maximize")
