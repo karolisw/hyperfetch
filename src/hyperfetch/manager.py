@@ -368,6 +368,7 @@ class Manager:
         self.n_min_trials = data['n_min_trials']
 
         # Verify the pruner in separate method
+        # Verify the pruner in separate method
         self._pruner_check(path_to_config)
         self._sampler_check(path_to_config)
 

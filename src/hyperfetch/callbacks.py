@@ -33,8 +33,6 @@ class TrialEvalCallback(EvalCallback):
             verbose: int = 0,
             best_model_save_path: Optional[str] = None,
             log_path: Optional[str] = None,
-            callback_on_new_best=None,
-            reward_threshold=None
 
     ) -> None:
         super().__init__(
@@ -45,12 +43,10 @@ class TrialEvalCallback(EvalCallback):
             verbose=verbose,
             best_model_save_path=best_model_save_path,
             log_path=log_path
-            # callback_on_new_best=callback_on_new_best
         )
         self.trial = trial
         self.eval_idx = 0
         self.is_pruned = False
-        # self.reward_threshold = reward_threshold
 
     def _on_step(self) -> bool:
         if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:
