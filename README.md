@@ -1,8 +1,16 @@
 # HyperFetch
+
+#### Prerequisistes 
+Has been tested with Linux and MacOS with these prerequisites:
+- pip==22.2.2
+- setuptools==64.0.3
+- swig==4.0.2
+- box2d-py==2.3.8
+
+
 #### HyperFetch is a tool consisting of:
 - A [website](https://white-rock-097162f03.3.azurestaticapps.net/) for fetching hyperparameters that are tuned by others
 - This pip-module for tuning and saving hyperparameters yourself 
-- NB: Only compatible with Linux distributions. Might be compatible with MacOS, but not yet tested.
 
 #### The intention of HyperFetch is to:
 - Make recreation of existing projects easier within the 

@@ -14,7 +14,7 @@ authors = [
 ]
 description = "HyperFetch. A tool to optimize and fetch hyperparameters for your reinforcement learning application. Currently only available on Linux."
 readme = "README.md"
-requires-python = ">=3.8, <3.11.0"
+requires-python = ">=3.9, <3.11.0"
 license = {file = "LICENSE"}
 keywords = ["reinforcement learning", "hyperparameters", "replication"]
 
@@ -23,27 +23,28 @@ classifiers = [
       'Intended Audience :: Developers',
       'License :: OSI Approved :: BSD License',
       'Operating System :: POSIX :: Linux',
-      'Programming Language :: Python :: 3.8',
       'Programming Language :: Python :: 3.9',
       'Programming Language :: Python :: 3.10',
       'Framework :: FastAPI',
 ]
 
 dependencies = [
+      'setuptools==64.0.3',
+      'swig==4.0.2',
+      'box2d-py==2.3.8',
       'python-benedict==0.30.0',
       'codecarbon==2.1.4',
-      'torch>=1.13.1',
-      'box2d-py==2.3.8',
-      'gym==0.21.0',
       'pandas==2.0.1',
       'PyYAML==6.0',
       'motor==3.1.2',
       'numpy==1.24.3',
+      'gym==0.21.0',
+      'torch>=1.13.1',
       'optuna==3.1.1',
       'stable-baselines3==1.8.0',
       'rl-zoo3==1.8.0',
       'python-dotenv==1.0.0',
-      'starlette==0.26.1'
+      'starlette==0.26.1',
 ]
 
 [project.urls]
