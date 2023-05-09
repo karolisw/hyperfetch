@@ -9,7 +9,7 @@ Has been tested with Linux and MacOS with these prerequisites:
 
 
 #### HyperFetch is a tool consisting of:
-- A [website](https://white-rock-097162f03.3.azurestaticapps.net/) for fetching hyperparameters that are tuned by others
+- A [website](https://www.hyperfetch.online/) for fetching hyperparameters that are tuned by others
 - This pip-module for tuning and saving hyperparameters yourself 
 
 #### The intention of HyperFetch is to:
@@ -33,8 +33,8 @@ By posting tuned [algorithm x environment] combinations to the website it's expe
 
 ## Links
 Repository: [HyperFetch Github](https://github.com/karolisw/hyperFetch)\
-Documentation: [Configuration docs](https://white-rock-097162f03.3.azurestaticapps.net/configDocs)\
-Website: [hyperfetch.online](https://white-rock-097162f03.3.azurestaticapps.net/)
+Documentation: [Configuration docs](https://www.hyperfetch.online/configDocs)\
+Website: [hyperfetch.online](https://www.hyperfetch.online/)
 ## Using the pip module
 To use the pip model please do the following:
 
@@ -65,7 +65,7 @@ The pip package must be installed before this can be done.
 For details, see [using the pip module](#using-the-pip-module).
 
 ### 1. Create configuration file using YAML (minimal example)
-If you are unsure of which configuration values to use, see the [config docs](https://white-rock-097162f03.3.azurestaticapps.net/configDocs)
+If you are unsure of which configuration values to use, see the [config docs](https://www.hyperfetch.online/configDocs)
 
 ```yaml
 # Required (example values)
@@ -112,7 +112,7 @@ The pip package must be installed before this can be done.
 For details, see [using the pip module](#using-the-pip-module).
 
 ### 1. Create configuartion  YAML file 
-If you are unsure of which configuration values to use, see the [config docs](https://white-rock-097162f03.3.azurestaticapps.net/configDocs)
+If you are unsure of which configuration values to use, see the [config docs](https://www.hyperfetch.online/configDocs)
 
 ```yaml
 # Required (example values)
