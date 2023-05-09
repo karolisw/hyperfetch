@@ -15,6 +15,16 @@ class CheckOriginMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         allowed_origins = ALLOWED_HOSTS
         origin = request.headers.get("Origin")
+        url = request.url.path  # get the requested URL
+
+        # allow requests to "/docs" from all origins
+        if url == "/docs":
+            response = await call_next(request)
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+            return response
+
+        # restrict other endpoints to the allowed origins
         if origin not in allowed_origins:
             return Response("Not allowed origin", status_code=403)
         response = await call_next(request)
