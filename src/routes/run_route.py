@@ -1,6 +1,6 @@
 # type: ignore
 from fastapi import Depends
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_201_CREATED
+from starlette.status import HTTP_201_CREATED
 from src.config.mongodb import get_database
 from src.dal.dal_run import *
 from src.models.receive_run import EnvsRead, RunsRead
