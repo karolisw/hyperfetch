@@ -16,18 +16,6 @@ SUPPORTED_ALGORITHMS = [
 ]
 
 
-async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:
-    # From Object to dict
-    document = new_run.dict()
-    document["_id"] = get_uuid()
-    document["created"] = get_time()
-    result = await conn[MONGO_DB][MONGO_COLLECTION].insert_one(document)
-    assert result.acknowledged
-
-    run = await show_run(conn=conn, run_id=result.inserted_id)
-    return run
-
-
 async def list_envs(conn: AsyncIOMotorClient) -> EnvsRead:
     cursor = await conn[MONGO_DB][MONGO_COLLECTION].find().distinct('env')
     return [EnvRead(env=document) for document in cursor]
@@ -74,6 +62,8 @@ async def show_run(conn: AsyncIOMotorClient, run_id: str) -> RunRead:
     return RunRead(**document)
 
 
+# NOT IN USE
+"""
 async def delete_run(conn: AsyncIOMotorClient, run_id: str) -> HTTP_204_NO_CONTENT:
     deleted_run = await conn[MONGO_DB][MONGO_COLLECTION].delete_one({"_id": run_id})
 
@@ -81,3 +71,15 @@ async def delete_run(conn: AsyncIOMotorClient, run_id: str) -> HTTP_204_NO_CONTE
         raise RunNotFoundException(run_id)
 
     return HTTP_204_NO_CONTENT
+    
+async def create(conn: AsyncIOMotorClient, new_run: RunCreate) -> RunRead:
+    # From Object to dict
+    document = new_run.dict()
+    document["_id"] = get_uuid()
+    document["created"] = get_time()
+    result = await conn[MONGO_DB][MONGO_COLLECTION].insert_one(document)
+    assert result.acknowledged
+
+    run = await show_run(conn=conn, run_id=result.inserted_id)
+    return run
+"""

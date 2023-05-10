@@ -44,15 +44,6 @@ async def fetch_envs(db: AsyncIOMotorClient = Depends(get_database)):
     return envs
 
 
-# Not in use and must be commented out if the project should be made public.
-@router.post("/api/create", response_description="Creates a run and returns its RunRead object",
-             response_model=RunRead, status_code=HTTP_201_CREATED,
-             responses=get_exception_responses(RunAlreadyExistsException), )
-async def create_run(new_run: RunCreate, db: AsyncIOMotorClient = Depends(get_database)) -> RunRead:
-    created_run = await create(conn=db, new_run=new_run)
-    return created_run
-
-
 @router.get("/api/env_top_trials", response_description="List the top trial for each algorithm for selected env",
             response_model=RunsRead)
 async def fetch_runs_for_env(env: str, db: AsyncIOMotorClient = Depends(get_database)):
@@ -75,10 +66,19 @@ async def fetch_run(run_id: str, db: AsyncIOMotorClient = Depends(get_database))
     return run
 
 
-# Not in use and must be commented out if the project should be made public.
+# Not in use currently and should not be callable through the API
+"""
+@router.post("/api/create", response_description="Creates a run and returns its RunRead object",
+             response_model=RunRead, status_code=HTTP_201_CREATED,
+             responses=get_exception_responses(RunAlreadyExistsException), )
+async def create_run(new_run: RunCreate, db: AsyncIOMotorClient = Depends(get_database)) -> RunRead:
+    created_run = await create(conn=db, new_run=new_run)
+    return created_run
+    
 @router.delete("/api/delete/{run_id}", response_description="Delete a single run by its unique ID",
                response_model=None, status_code=HTTP_204_NO_CONTENT,
                responses=get_exception_responses(RunNotFoundException))
 async def remove_run(run_id: str, db: AsyncIOMotorClient = Depends(get_database)) -> HTTP_204_NO_CONTENT:
     response = await delete_run(conn=db, run_id=run_id)
     return response
+"""
