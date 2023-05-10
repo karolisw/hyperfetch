@@ -22,15 +22,15 @@ jobs:
     - name: Log in to registry
       uses: docker/login-action@v2
       with:
-        registry: https://docker.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_468d4d693cd748089ae7b3ac02354b64 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_8a26f72689004d58b471443c538c1814 }}
+        registry: https://index.docker.io/v1/
+        username: ${{ secrets.AzureAppService_ContainerUsername_632e4ee651fc49aea9f77cfe4f72798a }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_3543c84832ec49139e19d5dca9138eb8 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: docker.io/${{ secrets.AzureAppService_ContainerUsername_468d4d693cd748089ae7b3ac02354b64 }}/karolisw/backend:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_632e4ee651fc49aea9f77cfe4f72798a }}/karolisw/backend:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'hyperfetch-backend'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_ba7c56c225b54b9cbc55ce939a4da510 }}
-        images: 'docker.io/${{ secrets.AzureAppService_ContainerUsername_468d4d693cd748089ae7b3ac02354b64 }}/karolisw/backend:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_ff2301b56ede45c3888dd85ac4204c0a }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_632e4ee651fc49aea9f77cfe4f72798a }}/karolisw/backend:${{ github.sha }}'
