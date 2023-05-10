@@ -17,27 +17,21 @@ class CheckOriginMiddleware(BaseHTTPMiddleware):
         origin = request.headers.get("Origin")
         url = request.url.path  # get the requested URL
 
-        if request.headers.get('X-Test-Request') == 'True':
-            # Allow test requests to pass through
-            response = await call_next(request)
-            response.headers["Access-Control-Allow-Origin"] = "*"
-            response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-            return response
-
         # allow requests to "/docs" from all origins
-        elif url == "/docs" or url == "/openapi.json":
+        if url == "/docs" or url == "/openapi.json":
             response = await call_next(request)
             response.headers["Access-Control-Allow-Origin"] = "*"
             response.headers["Access-Control-Allow-Headers"] = "Content-Type"
             return response
 
         # restrict other endpoints to the allowed origins
-        if origin not in allowed_origins:
+        elif origin not in allowed_origins:
             return Response("Not allowed origin", status_code=403)
-        response = await call_next(request)
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        return response
+        else:
+            response = await call_next(request)
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+            return response
 
 
 app.add_middleware(
@@ -51,6 +45,7 @@ app.add_middleware(
 app.add_middleware(
     TrustedHostMiddleware, allowed_hosts=["hyperfetch-backend.azurewebsites.net"]
 )
+
 app.add_middleware(
     CheckOriginMiddleware
 )
