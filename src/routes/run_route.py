@@ -80,8 +80,5 @@ async def fetch_run(run_id: str, db: AsyncIOMotorClient = Depends(get_database))
                response_model=None, status_code=HTTP_204_NO_CONTENT,
                responses=get_exception_responses(RunNotFoundException))
 async def remove_run(run_id: str, db: AsyncIOMotorClient = Depends(get_database)) -> HTTP_204_NO_CONTENT:
-    deleted_run = await delete_run(conn=db, run_id=run_id)
-    if deleted_run.deleted_count == 1:
-        return HTTP_204_NO_CONTENT
-    else:
-        return HTTP_404_NOT_FOUND
+    response = await delete_run(conn=db, run_id=run_id)
+    return response
