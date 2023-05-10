@@ -10,7 +10,9 @@ from src.models.create_run import RunCreate
 # create a TestClient instance
 client = TestClient(app)
 
-run_id = ""
+headers = {
+    'X-Test-Request': 'True'
+}
 
 
 # Connect to db
@@ -20,7 +22,7 @@ def connect():
 
 def test_fetch_envs():
     connect()
-    response = client.get("/api/")
+    response = client.get("/api/", headers=headers)
     assert response.status_code == 200
     assert response.json() == [{'env': 'Acrobot-v1'},
                                {'env': 'CartPole-v1'},

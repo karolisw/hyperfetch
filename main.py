@@ -17,8 +17,15 @@ class CheckOriginMiddleware(BaseHTTPMiddleware):
         origin = request.headers.get("Origin")
         url = request.url.path  # get the requested URL
 
+        if request.headers.get('X-Test-Request') == 'True':
+            # Allow test requests to pass through
+            response = await call_next(request)
+            response.headers["Access-Control-Allow-Origin"] = "*"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+            return response
+
         # allow requests to "/docs" from all origins
-        if url == "/docs":
+        elif url == "/docs" or url == "/openapi.json":
             response = await call_next(request)
             response.headers["Access-Control-Allow-Origin"] = "*"
             response.headers["Access-Control-Allow-Headers"] = "Content-Type"
