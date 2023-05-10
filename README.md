@@ -1,12 +1,15 @@
 # HyperFetch
 
 #### Prerequisistes 
-Has been tested with Linux and MacOS with these prerequisites:
+The package has been successfully tested with Linux and MacOS.\
+However, these are the prerequisites:
 - pip==22.2.2
 - setuptools==64.0.3
 - swig==4.0.2
 - box2d-py==2.3.8
 
+NB: If you are able to install box2d-py==2.3.8 on your Windows computer, then the installation will likely succeed 
+there as well.
 
 #### HyperFetch is a tool consisting of:
 - A [website](https://www.hyperfetch.online/) for fetching hyperparameters that are tuned by others
@@ -26,17 +29,16 @@ By posting tuned [algorithm x environment] combinations to the website it's expe
 
 
 ## Content
-* [Links](#links)
-* 1.0 [Using the pip module](#using-the-pip-module)
-* 2.0 [Examples](#example-1--tuning--posting-using-hyperfetch)
+* 1.0 [Using this package](#using-the-pip-module)
+* 2.0 [Examples of use](#example-1--tuning--posting-using-hyperfetch)
 
 
 ## Links
 Repository: [HyperFetch Github](https://github.com/karolisw/hyperFetch)\
 Documentation: [Configuration docs](https://www.hyperfetch.online/configDocs)\
 Website: [hyperfetch.online](https://www.hyperfetch.online/)
-## Using the pip module
-To use the pip model please do the following:
+## Using this package
+To use this package please do the following:
 
 1. Create a virtual environment in your favorite IDE. 
 
@@ -51,18 +53,15 @@ To use the pip model please do the following:
    Activate virtualenv this way (Linux/MacOS):
    
             source myvenv/bin/activate
-2. Install the pip-module. 
+2. Install the [prerequisites](#prerequisistes).
+3. Install the pip-module. 
 
         pip install hyperfetch
 
 
          
-## Example 1: tuning + posting using HyperFetch
+## Example 1: tuning + posting 
 Here is a quick example of how to tune and run PPO in the Pendulum-v1 environment inside your new or existing project:
-
-### Just a reminder:
-The pip package must be installed before this can be done.
-For details, see [using the pip module](#using-the-pip-module).
 
 ### 1. Create configuration file using YAML (minimal example)
 If you are unsure of which configuration values to use, see the [config docs](https://www.hyperfetch.online/configDocs)
@@ -81,7 +80,7 @@ n_trials: 20
 log_folder: logs
 ```
 
-### 2. Tune using python file or the command line
+### 2. Tune and post using python file or the command line
 
 ```python
 
@@ -133,15 +132,15 @@ hyperparameters: # These depend on the choice of algorithm
   target_update_interval: 1000
   train_freq: 8
   
-# Not required (but appreciated)
+# Not required (but appreciated if you have the data)
 CO2_emissions: 0.78 #kgs
 energy_consumed: 3.27 #kWh
 cpu_model: 12th Gen Intel(R) Core(TM) i5-12500H
 gpu_model: NVIDIA GeForce RTX 3070
-total_time: 0:04:16.842800 # H:M:S:MS
+total_time: 0:04:16.842800 # Format: H:M:S:MS
 ```
 
-### 2. Save/post using python file or command line
+### 2. Post using python file or command line
 
 #### Python file:
 ```python
