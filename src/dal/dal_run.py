@@ -1,8 +1,8 @@
 from starlette.status import HTTP_204_NO_CONTENT
 from src.models.create_run import RunCreate
 from typing import List
-from src.config.mongodb import AsyncIOMotorClient
-from src.config.auth_connection import MONGO_DB, MONGO_COLLECTION
+from src.db_config.mongodb import AsyncIOMotorClient
+from src.db_config.auth_connection import MONGO_DB, MONGO_COLLECTION
 from src.models.receive_run import RunRead, EnvRead, RunsRead, EnvsRead
 from src.utils.db_utils import get_time, get_uuid
 from src.utils.exceptions import RunNotFoundException

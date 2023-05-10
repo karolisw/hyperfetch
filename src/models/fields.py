@@ -63,7 +63,7 @@ class RunFields:
         description="The pruner used to prune (terminate) trials early when performing under par. "
     )
     n_trials = Field(
-        description="The number of Optuna trials that was set in the config file."
+        description="The number of Optuna trials that was set in the db_config file."
     )
     country = Field(
         description="The country that the hyperparameters were trained in."

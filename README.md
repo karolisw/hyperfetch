@@ -81,7 +81,7 @@ log_folder: logs
 
 from hyperfetch import tuning
 
-# Path to your YAML config file 
+# Path to your YAML db_config file 
 config_path = "../some_folder/config_name.yml"
 
 # Writes each trial's best hyperparameters to log folder
@@ -142,7 +142,7 @@ total_time: 0:04:16.842800 # H:M:S:MS
 
 from hyperfetch import tuning
 
-# Path to your YAML config file 
+# Path to your YAML db_config file 
 config_path = "../some_folder/config_name.yml"
 
 # Writes each trial's best hyperparameters to log folder

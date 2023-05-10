@@ -5,7 +5,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from src.routes.run_route import router
-from src.config.auth_connection import ALLOWED_HOSTS
+from src.db_config.auth_connection import ALLOWED_HOSTS
 from src.utils.db_utils import connect_to_motor, close_motor_connection
 
 app = FastAPI()

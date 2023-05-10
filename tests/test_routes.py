@@ -1,11 +1,10 @@
 from fastapi.encoders import jsonable_encoder
 from fastapi.testclient import TestClient
 from motor.motor_asyncio import AsyncIOMotorClient
-from starlette.status import HTTP_204_NO_CONTENT
 
 from main import app
-from src.config.auth_connection import MONGODB_URL
-from src.config.mongodb import db
+from src.db_config.auth_connection import MONGODB_URL
+from src.db_config.mongodb import db
 from src.models.create_run import RunCreate
 
 # create a TestClient instance

@@ -1,7 +1,7 @@
 # type: ignore
 from fastapi import Depends
 from starlette.status import HTTP_201_CREATED
-from src.config.mongodb import get_database
+from src.db_config.mongodb import get_database
 from src.dal.dal_run import *
 from src.models.receive_run import EnvsRead, RunsRead
 from src.utils.exceptions import RunAlreadyExistsException, get_exception_responses, RunNotFoundException
