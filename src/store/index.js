@@ -47,6 +47,7 @@ export default createStore({
         state.selected_run = run
     }
   },
+  
   getters: {
     GET_ENVS(state) {
         return state.envs
@@ -84,7 +85,6 @@ export default createStore({
             })
         } catch (error) {
             console.log('Could not get envs from db with error: ' + error)
-            console.log("Response value: ", response)
         }
     },
 

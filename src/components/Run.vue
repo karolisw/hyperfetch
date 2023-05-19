@@ -89,7 +89,24 @@ export default {
       updateData(this.rowData)
     },
 
-    
+    /**
+     * Grid object is mounted to the DOM and stats are loaded into first grid here
+     * @param {*} params the current grid 
+     */
+    onGridReadyReward(params) {
+      this.gridApi = params.api;
+      this.gridColumnApi = params.columnApi; 
+      const updateData = (data) => {
+        params.api.setRowData(data)
+      };
+      let run = this.currentRun
+
+      this.rewardData.push({ param: "Reward", value: run.reward }) 
+      this.rewardData.push({ param: "CO2 emissions", value: run.CO2_emissions })
+      this.rewardData.push({ param: "Energy consumed", value: run.energy_consumed })
+      this.rewardData.push({ param: "Total time", value: run.total_time })
+      updateData(this.rewardData)
+    },
     /**
      * Grid object is mounted to the DOM and stats are loaded into second grid here
      * @param {*} params the current grid 
@@ -103,6 +120,7 @@ export default {
       };
       
       let run = this.currentRun
+
       this.statData.push({ param: "# trials", value: run.n_trials })
       this.statData.push({ param: "CPU model", value: run.cpu_model })
       this.statData.push({ param: "GPU model", value: run.gpu_model })
@@ -116,13 +134,6 @@ export default {
       this.statData.push({ param: "Cloud region", value: run.cloud_region })
       this.statData.push({ param: "OS", value: run.os })
       this.statData.push({ param: "Python version", value: run.python_version })
-
-      // Separate table 
-      this.rewardData.push({ param: "Reward", value: run.reward }) 
-      this.rewardData.push({ param: "CO2 emissions", value: run.CO2_emissions })
-      this.rewardData.push({ param: "Energy consumed", value: run.energy_consumed })
-      this.rewardData.push({ param: "Total time", value: run.total_time })
-
       updateData(this.statData)
     }
   }
@@ -133,7 +144,7 @@ export default {
     <div class="run-stats">
       <h3>Reward and emissions</h3>
       <ag-grid-vue id="reward"
-        @grid-ready="onGridReadyStats"
+        @grid-ready="onGridReadyReward"
         style="width: 80vh; height: 27vh"
         class="ag-theme-alpine"
         :defaultColDef="defaultColDef"

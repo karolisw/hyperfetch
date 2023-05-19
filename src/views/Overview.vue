@@ -16,14 +16,11 @@ export default {
             displayRuns: false,
             displayRun:false,
             selectedAlg: '',
-            value: 0,
         }
     },
 
     methods: {
-        async activateRunsOverview(alg) {
-            this.value = 50
-            
+        async activateRunsOverview(alg) {            
             alg = fromFullToShort(alg)
             this.$store.commit('SET_CURRENT_ALG', alg)
 
@@ -43,7 +40,6 @@ export default {
         },
 
         async activateRunView(run) {
-            this.value = 100
             this.$store.commit('SET_CURRENT_RUN', run)
             this.displayRun = true
         },
